@@ -23,6 +23,7 @@ namespace GameAggregator
         public MainWindow()
         {
             InitializeComponent();
+            Steam steam = new Steam("76561198254132723"); //Dingo's id (temp)
         }
     }
 }

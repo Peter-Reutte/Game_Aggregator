@@ -59,6 +59,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EpicGames\EpicGames.cs" />
+    <Compile Include="EpicGames\Models\EGame.cs" />
     <Compile Include="Steam\Steam.cs" />
     <Compile Include="Steam\Steam_GameList.cs" />
     <Compile Include="Steam\Steam_GetId.cs" />
@@ -101,6 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Debug\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

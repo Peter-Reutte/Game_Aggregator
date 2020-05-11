@@ -43,9 +43,11 @@ namespace GameAggregator.EGames
     public class EpicGames
     {
         private static readonly string egBackendUrl = "https://www.epicgames.com/store/backend/graphql-proxy";
-        private static readonly string egProductPartUrl = "https://store-content.ak.epicgames.com/api/ru/content/products/";
+        private static readonly string egProductMappingUrl = "https://store-content.ak.epicgames.com/api/content/productmapping";
+        private static readonly string egProductUrl = "https://store-content.ak.epicgames.com/api/ru/content/products/";
 
         private static WebClient egBackendClient;
+        private static WebClient egProductMappingClient;
         private static WebClient egGetGameClient;
 
         private static string storeQueryVariables = "\"variables\":{{\"category\":\"games/edition/base|bundles/games|editors\",\"count\":{0},\"country\":\"RU\",\"keywords\":\"\",\"locale\":\"ru\",\"sortBy\":\"{1}\",\"sortDir\":\"{2}\",\"start\":{3},\"tag\":\"\",\"allowCountries\":\"RU\",\"withPrice\":true";
@@ -57,9 +59,10 @@ namespace GameAggregator.EGames
         static EpicGames()
         {
             egBackendClient = new WebClient() { BaseAddress = egBackendUrl };
-            egBackendClient.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+            egBackendClient.Headers.Add(HttpRequestHeader.ContentType, "application/json; charset=utf-8");
 
-            egGetGameClient = new WebClient() { BaseAddress = egProductPartUrl };
+            egProductMappingClient = new WebClient() { BaseAddress = egProductMappingUrl };
+            egGetGameClient = new WebClient() { BaseAddress = egProductUrl };
         }
 
         /// <summary>
@@ -73,6 +76,9 @@ namespace GameAggregator.EGames
         public static List<EGame> GetStoreGames(int startIndex = 0, int count = 30, EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
         {
             var games = new List<EGame>();
+
+            string productMappingResponce = egProductMappingClient.DownloadString("");
+            var jMap = JObject.Parse(productMappingResponce).Properties();
 
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
@@ -92,9 +98,8 @@ namespace GameAggregator.EGames
                 var name = elem["title"].ToString();
                 var id = elem["id"].ToString();
 
-                var urlName = elem["productSlug"].ToString();
-                urlName = urlName.EndsWith("/home") ? urlName.Remove(urlName.Length - 5) : urlName;
-                var url = egProductPartUrl + urlName;
+                var gameNamespace = elem["namespace"].ToString();
+                var urlName = jMap.First(x => x.Name == gameNamespace).Value.ToString();
 
                 var imgWide = elem["keyImages"]
                     .First(x => x["type"].ToString() == "OfferImageWide")
@@ -118,8 +123,8 @@ namespace GameAggregator.EGames
                 {
                     Name = name,
                     Id = id,
+                    Namespace = gameNamespace,
                     UrlName = urlName,
-                    Url = url,
                     ImageUrlWide = imgWide,
                     ImageUrlTall = imgTall,
                     Price = price,

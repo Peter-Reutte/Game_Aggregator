@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace GameAggregator
+namespace GameAggregator.SteamStore
 {
     public class SteamGame
     {

@@ -65,9 +65,11 @@
     </Compile>
     <Compile Include="EpicGames\EpicGames.cs" />
     <Compile Include="EpicGames\Models\EGame.cs" />
+    <Compile Include="Origin\Origin.cs" />
+    <Compile Include="Origin\Models\OriginGame.cs" />
     <Compile Include="Steam\Steam.cs" />
-    <Compile Include="Steam\Steam_AppList.cs" />
-    <Compile Include="Steam\Steam_GameList.cs" />
+    <Compile Include="Steam\Models\Steam_AppList.cs" />
+    <Compile Include="Steam\Models\Steam_GameList.cs" />
     <Page Include="EpicGames\AuthWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

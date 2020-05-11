@@ -10,15 +10,17 @@ using System.Net;
 using System.Runtime.Caching;
 using System.Text.RegularExpressions;
 
-namespace GameAggregator
+namespace GameAggregator.SteamStore
 {
     public class Steam
     {
         private readonly string Key; // Ключ WebAPI
-
+        private static WebClient SteamWebClient;
 
         public Steam()
         {
+            SteamWebClient = new WebClient();
+
             //временно -- Steam Web API key
             StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
             Key = sr.ReadLine();
@@ -38,11 +40,10 @@ namespace GameAggregator
         /// </summary>
         private void RefreshAppIDs()
         {
-            WebClient client = new WebClient();
             string result;
             try
             {
-                result = client.DownloadString("http://api.steampowered.com/ISteamApps/GetAppList/v0002");
+                result = SteamWebClient.DownloadString("http://api.steampowered.com/ISteamApps/GetAppList/v0002");
             }
             catch
             {
@@ -72,7 +73,7 @@ namespace GameAggregator
 
             try
             {
-                string responce = new WebClient().DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appid);
+                string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appid);
                 JObject jsonObj = JObject.Parse(responce);
                 return jsonObj[appid]["data"]["price_overview"]["final_formatted"].ToString();
             }
@@ -94,7 +95,7 @@ namespace GameAggregator
             string responce;
             try
             {
-                responce = new WebClient().DownloadString("http://api.steampowered.com/IPlayerService/GetOwnedGames/" +
+                responce = SteamWebClient.DownloadString("http://api.steampowered.com/IPlayerService/GetOwnedGames/" +
                     "v0001/?key=" + Key + "&steamid=" + id + "&include_appinfo=true&format=json");
             }
             catch
@@ -120,7 +121,7 @@ namespace GameAggregator
                 JObject jsonObj;
                 try
                 {
-                    jsonObj = JObject.Parse(new WebClient().DownloadString(
+                    jsonObj = JObject.Parse(SteamWebClient.DownloadString(
                         "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=" + Key + "&vanityurl=" + id));
                 }
                 catch
@@ -151,7 +152,7 @@ namespace GameAggregator
             byte[] data;
             try
             {
-                data = new WebClient().DownloadData("http://media.steampowered.com/steamcommunity/public/images/apps/" +
+                data = SteamWebClient.DownloadData("http://media.steampowered.com/steamcommunity/public/images/apps/" +
                     + game.Appid + "/" + game.Img_icon_url + ".jpg");
             }
             catch

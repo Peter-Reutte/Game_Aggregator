@@ -1,19 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace GameAggregator
+namespace GameAggregator.SteamStore
 {
-    public class OwnedGame
+    public class OwnedGame : SteamGame
     {
-        /// <summary>
-        /// AppID игры
-        /// </summary>
-        public int Appid { get; set; }
-
-        /// <summary>
-        /// Наименование игры
-        /// </summary>
-        public string Name { get; set; }
-
         /// <summary>
         /// Время в игре
         /// </summary>

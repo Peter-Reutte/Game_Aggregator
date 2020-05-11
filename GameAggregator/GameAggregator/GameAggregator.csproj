@@ -60,11 +60,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EpicGames\AuthWindow.xaml.cs">
+      <DependentUpon>AuthWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EpicGames\EpicGames.cs" />
     <Compile Include="EpicGames\Models\EGame.cs" />
     <Compile Include="Steam\Steam.cs" />
     <Compile Include="Steam\Steam_AppList.cs" />
     <Compile Include="Steam\Steam_GameList.cs" />
+    <Page Include="EpicGames\AuthWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

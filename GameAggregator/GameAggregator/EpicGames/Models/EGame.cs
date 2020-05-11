@@ -10,8 +10,9 @@ namespace GameAggregator.EGames.Models
     {
         public string Id { get; set; }
         public string Name { get; set; }
+
+        public string Namespace { get; set; }
         public string UrlName { get; set; }
-        public string Url { get; set; }
 
         public string ImageUrlWide { get; set; } //Широкий формат изображения
         public string ImageUrlTall { get; set; } //Длинный формат изображения (если отсутствует, указывается URL логотипа, если он есть)

@@ -23,7 +23,7 @@ namespace GameAggregator.EGames.Models
     }
 
     //Дополнительные поля описания, доступные при обращении к конкретной игре
-    public class EGameFull : Game
+    public class EGameFull : EGame
     {
         public string DeveloperName { get; set; }
         public string PublisherName { get; set; }

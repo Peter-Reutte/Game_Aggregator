@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 
 namespace GameAggregator.OriginStore
@@ -8,6 +10,9 @@ namespace GameAggregator.OriginStore
     public class Origin
     {
         private readonly WebClient OriginWebClient;
+
+        public Origin() => OriginWebClient = new WebClient();
+
 
         /// <summary>
         /// Поиск игр в магазине Origin
@@ -38,6 +43,42 @@ namespace GameAggregator.OriginStore
             }
 
             return links;
+        }
+
+        /// <summary>
+        /// Запускает выбранную игру
+        /// </summary>
+        /// <param name="game">Путь к exe-файу, запускающему игру</param>
+        public void LaunchGame(string link)
+        {
+            try
+            {
+                Process.Start(link);
+            }
+            catch //Если exe-файл игры нестандартный, запускается сам Origin
+            {
+                string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+                RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+                foreach (string ksubKey in key.GetSubKeyNames())
+                {
+                    using (RegistryKey subKey = key.OpenSubKey(ksubKey))
+                    {
+                        string publisher = "";
+                        try
+                        {
+                            publisher = subKey.GetValue("Publisher").ToString();
+                            if (!publisher.Contains("Electronic Arts")) continue;
+                            string title = subKey.GetValue("DisplayName").ToString();
+                            string installLocation = subKey.GetValue("InstallLocation").ToString();
+                            if (title == "Origin")
+                            {
+                                Process.Start(installLocation + "Origin.exe");
+                            }
+                        }
+                        catch { continue; }
+                    }
+                }
+            }
         }
     }
 }

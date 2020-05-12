@@ -17,4 +17,18 @@ namespace GameAggregator.InstalledSearch
             Directory = directory;
         }
     }
+
+    public class Origin_InstalledGame
+    {
+        public string Name { get; set; }
+        public string Directory { get; set; }
+        public string LaunchExe { get; set; }
+
+        public Origin_InstalledGame(string name, string directory)
+        {
+            Name = name;
+            Directory = directory;
+            LaunchExe = directory + name + ".exe";
+        }
+    }
 }

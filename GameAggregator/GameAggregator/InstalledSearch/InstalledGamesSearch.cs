@@ -2,10 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GameAggregator.InstalledSearch
 {
@@ -13,7 +10,8 @@ namespace GameAggregator.InstalledSearch
     {
         public static void SearchForinstalledGames()
         {
-            Search_SteamInstalled();
+            //Search_SteamInstalled();
+            //Search_OriginInstalled();
         }
 
         private static List<Steam_InstalledGame> Search_SteamInstalled()
@@ -89,6 +87,38 @@ namespace GameAggregator.InstalledSearch
             }
 
             return steam_InstalledGames;
+        }
+
+        private static List<Origin_InstalledGame> Search_OriginInstalled()
+        {
+            List<Origin_InstalledGame> originGames = new List<Origin_InstalledGame>();
+            string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+            RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+            foreach (string ksubKey in key.GetSubKeyNames())
+            {
+                using (RegistryKey subKey = key.OpenSubKey(ksubKey))
+                {
+                    string publisher = "";
+                    try
+                    {
+                        publisher = subKey.GetValue("Publisher").ToString();
+                        if (!publisher.Contains("Electronic Arts")) continue;
+                    }
+                    catch { continue; }
+
+                    string title = subKey.GetValue("DisplayName").ToString();
+                    if (title == "Origin") continue;
+
+                    string installLocation = subKey.GetValue("InstallLocation").ToString();
+
+                    if (!originGames.Exists(x => x.Name == title))
+                    {
+                        originGames.Add(new Origin_InstalledGame(title, installLocation));
+                    }
+                }
+            }
+
+            return originGames;
         }
     }
 }

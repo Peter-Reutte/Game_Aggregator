@@ -30,7 +30,7 @@ namespace GameAggregator.EGames.Models
         public string PublisherName { get; set; }
 
         public DateTime? Date { get; set; }
-        public string DateStr => Date.Value.ToShortDateString() ?? "–";
+        public string DateStr { get; set; } //Example: "16.04.2020" (для вышедших), "2021", "Летом 2021", "-" (для предстоящих)
 
         public IList<string> Platforms { get; set; }
         public string Description { get; set; }

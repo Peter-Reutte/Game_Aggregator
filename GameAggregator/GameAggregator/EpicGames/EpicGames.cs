@@ -59,10 +59,14 @@ namespace GameAggregator.EGames
         static EpicGames()
         {
             egBackendClient = new WebClient() { BaseAddress = egBackendUrl };
-            egBackendClient.Headers.Add(HttpRequestHeader.ContentType, "application/json; charset=utf-8");
+            egBackendClient.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+            egBackendClient.Encoding = Encoding.UTF8;
 
             egProductMappingClient = new WebClient() { BaseAddress = egProductMappingUrl };
+            egProductMappingClient.Encoding = Encoding.UTF8;
+
             egGetGameClient = new WebClient() { BaseAddress = egProductUrl };
+            egGetGameClient.Encoding = Encoding.UTF8;
         }
 
         /// <summary>
@@ -119,7 +123,7 @@ namespace GameAggregator.EGames
                 string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
                 string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
 
-                var game = new EGame()
+                var game = new EGameFull()
                 {
                     Name = name,
                     Id = id,
@@ -137,6 +141,45 @@ namespace GameAggregator.EGames
             }
 
             return games;
+        }
+
+        /// <summary>
+        /// Делает отдельный запрос на получение полной информации о конкретной игре.
+        /// Заполняет дополнительные поля в объекте EGame и возвращает его же в виде расширения EGameFull
+        /// </summary>
+        /// <param name="game">Игра, для которой нужно получить дополнительную информацию</param>
+        /// <returns>EGameFull объект - расширение над переданным объектом game</returns>
+        public static EGameFull GetGameInfo(EGame game)
+        {
+            var gameInfo = game as EGameFull;
+
+            string responce = egGetGameClient.DownloadString(game.UrlName);
+            var jObj = JObject.Parse(responce);
+            var data = jObj["pages"].FirstOrDefault()?["data"];
+
+            var pNames = (data["meta"]?["publisher"] as JArray)?.FirstOrDefault() ?? data["about"]?["publisherAttribution"];
+            var dNames = (data["meta"]?["developer"] as JArray)?.FirstOrDefault() ?? data["about"]?["developerAttribution"];
+            gameInfo.PublisherName = pNames?.ToString() ?? "–";
+            gameInfo.DeveloperName = dNames?.ToString() ?? "–";
+
+            gameInfo.Date = data["meta"]?["releaseDate"]?.ToObject<DateTime>();
+            gameInfo.DateStr = gameInfo.Date?.ToShortDateString() ?? "–";
+            if(gameInfo.Date == null && data["meta"]?["customReleaseDate"] != null)
+                gameInfo.DateStr = data["meta"]["customReleaseDate"].ToString();
+
+            gameInfo.Languages = "–";
+            var languagesList = data["requirements"]?["languages"]?.Select(x => x.ToString());
+            if (languagesList != null && languagesList.Count() != 0)
+                gameInfo.Languages = string.Join("\n", languagesList);
+
+            var requirementsList = data["requirements"]?["systems"]?.Select(x => x.FirstOrDefault(y => (y as JProperty).Name == "systemType"));
+            var platformsList = requirementsList?.Select(x => (x as JProperty).Value) ??
+                (data["meta"]?["platform"] as JArray);
+            gameInfo.Platforms = platformsList?.Select(x => x.ToString()).ToList() ?? new List<string>();
+
+            gameInfo.Description = data["about"]?["description"]?.ToString() ?? "–";
+
+            return gameInfo;
         }
 
         /// <summary>

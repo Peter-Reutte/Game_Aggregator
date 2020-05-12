@@ -12,6 +12,7 @@ namespace GameAggregator.InstalledSearch
         {
             //Search_SteamInstalled();
             //Search_OriginInstalled();
+            //Search_UplayInstalled();
         }
 
         private static List<Steam_InstalledGame> Search_SteamInstalled()
@@ -119,6 +120,26 @@ namespace GameAggregator.InstalledSearch
             }
 
             return originGames;
+        }
+
+        private static List<Uplay_InstalledGame> Search_UplayInstalled()
+        {
+            List<Uplay_InstalledGame> uplayGames = new List<Uplay_InstalledGame>();
+            string regkey = "SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs";
+            RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+            foreach (string ksubKey in key.GetSubKeyNames())
+            {
+                string dir = "", name = "";
+                using (RegistryKey subKey = key.OpenSubKey(ksubKey))
+                {
+                    dir = subKey.GetValue("InstallDir").ToString();
+                    name = dir.Remove(dir.Length - 1);
+                    name = name.Substring(name.LastIndexOf('/') + 1);
+                }
+                uplayGames.Add(new Uplay_InstalledGame(name, dir, ksubKey));
+            }
+
+            return uplayGames;
         }
     }
 }

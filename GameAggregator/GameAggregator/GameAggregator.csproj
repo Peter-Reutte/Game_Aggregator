@@ -72,6 +72,7 @@
     <Compile Include="Steam\Steam.cs" />
     <Compile Include="Steam\Models\Steam_AppList.cs" />
     <Compile Include="Steam\Models\Steam_GameList.cs" />
+    <Compile Include="Uplay\Uplay.cs" />
     <Page Include="EpicGames\AuthWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

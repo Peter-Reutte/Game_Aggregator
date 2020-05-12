@@ -31,4 +31,18 @@ namespace GameAggregator.InstalledSearch
             LaunchExe = directory + name + ".exe";
         }
     }
+
+    public class Uplay_InstalledGame
+    {
+        public string Name { get; set; }
+        public string Directory { get; set; }
+        public string Appid { get; set; }
+
+        public Uplay_InstalledGame(string name, string directory, string appid)
+        {
+            Name = name;
+            Directory = directory;
+            Appid = appid;
+        }
+    }
 }

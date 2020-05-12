@@ -65,6 +65,8 @@
     </Compile>
     <Compile Include="EpicGames\EpicGames.cs" />
     <Compile Include="EpicGames\Models\EGame.cs" />
+    <Compile Include="InstalledSearch\InstalledGamesSearch.cs" />
+    <Compile Include="InstalledSearch\Model\InstalledGameModels.cs" />
     <Compile Include="Origin\Origin.cs" />
     <Compile Include="Origin\Models\OriginGame.cs" />
     <Compile Include="Steam\Steam.cs" />

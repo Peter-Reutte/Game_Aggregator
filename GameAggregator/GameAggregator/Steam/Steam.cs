@@ -32,7 +32,7 @@ namespace GameAggregator.SteamStore
             Steam_OwnedGameList list = GetOwnedGamesList("https://steamcommunity.com/profiles/76561198254132723"); //Dingo's profile (temp)
             //Image image = GetGameIcon(list.Response.Games[0]);
             //image.Save("test.jpg", ImageFormat.Jpeg);
-            //LaunchGame(list.Response.Games[0]);
+            //LaunchGame(list.Response.Games[0].Appid);
         }
 
         /// <summary>
@@ -166,10 +166,9 @@ namespace GameAggregator.SteamStore
         /// <summary>
         /// Запускает выбранную игру; нужен установленный Steam-клиент
         /// Если игра не установлена -- запускает установку
-        /// TODO: Если не установлен Steam-клиент -- отсылать на страницу для скачивания ?
         /// </summary>
         /// <param name="game">Игра для запуска</param>
-        public void LaunchGame(OwnedGame game) => Process.Start("steam://rungameid/" + game.Appid);
+        public void LaunchGame(int appid) => Process.Start("steam://rungameid/" + appid.ToString());
     }
 }
 

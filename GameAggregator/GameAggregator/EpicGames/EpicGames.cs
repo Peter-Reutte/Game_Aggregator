@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using GameAggregator.EGames.Models;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -42,21 +44,43 @@ namespace GameAggregator.EGames
 
     public class EpicGames
     {
-        private static readonly string egBackendUrl = "https://www.epicgames.com/store/backend/graphql-proxy";
-        private static readonly string egProductMappingUrl = "https://store-content.ak.epicgames.com/api/content/productmapping";
-        private static readonly string egProductUrl = "https://store-content.ak.epicgames.com/api/ru/content/products/";
+        #region Fields
 
-        private static WebClient egBackendClient;
-        private static WebClient egProductMappingClient;
-        private static WebClient egGetGameClient;
+        #region URLs
 
-        private static string storeQueryVariables = "\"variables\":{{\"category\":\"games/edition/base|bundles/games|editors\",\"count\":{0},\"country\":\"RU\",\"keywords\":\"\",\"locale\":\"ru\",\"sortBy\":\"{1}\",\"sortDir\":\"{2}\",\"start\":{3},\"tag\":\"\",\"allowCountries\":\"RU\",\"withPrice\":true";
-        private static string storeQuery = "{{\"query\":\"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $withPrice: Boolean = false, $withPromotions: Boolean = false) {{\\n  Catalog {{\\n    searchStore(allowCountries: $allowCountries, category: $category, count: $count, country: $country, keywords: $keywords, locale: $locale, namespace: $namespace, sortBy: $sortBy, sortDir: $sortDir, start: $start, tag: $tag) {{\\n      elements {{\\n        title\\n        id\\n        namespace\\n        description\\n        effectiveDate\\n        keyImages {{\\n          type\\n          url\\n        }}\\n        seller {{\\n          id\\n          name\\n        }}\\n        productSlug\\n        urlSlug\\n        url\\n        items {{\\n          id\\n          namespace\\n        }}\\n        customAttributes {{\\n          key\\n          value\\n        }}\\n        categories {{\\n          path\\n        }}\\n        price(country: $country) @include(if: $withPrice) {{\\n          totalPrice {{\\n            discountPrice\\n            originalPrice\\n            voucherDiscount\\n            discount\\n            currencyCode\\n            currencyInfo {{\\n              decimals\\n            }}\\n            fmtPrice(locale: $locale) {{\\n              originalPrice\\n              discountPrice\\n              intermediatePrice\\n            }}\\n          }}\\n          lineOffers {{\\n            appliedRules {{\\n              id\\n              endDate\\n              discountSetting {{\\n                discountType\\n              }}\\n            }}\\n          }}\\n        }}\\n        promotions(category: $category) @include(if: $withPromotions) {{\\n          promotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n          upcomingPromotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n        }}\\n      }}\\n      paging {{\\n        count\\n        total\\n      }}\\n    }}\\n  }}\\n}}\\n\",{0}}}}}";
+        private readonly string egBackendUrl = "https://www.epicgames.com/store/backend/graphql-proxy";
+        private readonly string egProductMappingUrl = "https://store-content.ak.epicgames.com/api/content/productmapping";
+        private readonly string egProductUrl = "https://store-content.ak.epicgames.com/api/ru/content/products/";
+    
+        #endregion
 
+        #region WebClients
 
-        public EpicGames() { }
+        private WebClient egBackendClient;
+        private WebClient egProductMappingClient;
+        private WebClient egGetGameClient;
+  
+        #endregion
 
-        static EpicGames()
+        #region Queries
+
+        private string storeQueryVariables = "\"variables\":{{\"category\":\"games/edition/base|bundles/games|editors\",\"count\":{0},\"country\":\"RU\",\"keywords\":\"\",\"locale\":\"ru\",\"sortBy\":\"{1}\",\"sortDir\":\"{2}\",\"start\":{3},\"tag\":\"\",\"allowCountries\":\"RU\",\"withPrice\":true";
+        private string storeQuery = "{{\"query\":\"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $withPrice: Boolean = false, $withPromotions: Boolean = false) {{\\n  Catalog {{\\n    searchStore(allowCountries: $allowCountries, category: $category, count: $count, country: $country, keywords: $keywords, locale: $locale, namespace: $namespace, sortBy: $sortBy, sortDir: $sortDir, start: $start, tag: $tag) {{\\n      elements {{\\n        title\\n        id\\n        namespace\\n        description\\n        effectiveDate\\n        keyImages {{\\n          type\\n          url\\n        }}\\n        seller {{\\n          id\\n          name\\n        }}\\n        productSlug\\n        urlSlug\\n        url\\n        items {{\\n          id\\n          namespace\\n        }}\\n        customAttributes {{\\n          key\\n          value\\n        }}\\n        categories {{\\n          path\\n        }}\\n        price(country: $country) @include(if: $withPrice) {{\\n          totalPrice {{\\n            discountPrice\\n            originalPrice\\n            voucherDiscount\\n            discount\\n            currencyCode\\n            currencyInfo {{\\n              decimals\\n            }}\\n            fmtPrice(locale: $locale) {{\\n              originalPrice\\n              discountPrice\\n              intermediatePrice\\n            }}\\n          }}\\n          lineOffers {{\\n            appliedRules {{\\n              id\\n              endDate\\n              discountSetting {{\\n                discountType\\n              }}\\n            }}\\n          }}\\n        }}\\n        promotions(category: $category) @include(if: $withPromotions) {{\\n          promotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n          upcomingPromotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n        }}\\n      }}\\n      paging {{\\n        count\\n        total\\n      }}\\n    }}\\n  }}\\n}}\\n\",{0}}}}}";
+
+        #endregion
+
+        #region Registry
+
+        private readonly string dataRegistryKey = @"SOFTWARE\Epic Games\EpicGamesLauncher";
+        private readonly string dataRegistryName = "AppDataPath";
+
+        #endregion
+
+        private readonly string LaunchString = @"com.epicgames.launcher://apps/{0}?action=launch&silent=true";
+
+        #endregion
+
+        public EpicGames()
         {
             egBackendClient = new WebClient() { BaseAddress = egBackendUrl };
             egBackendClient.Headers.Add(HttpRequestHeader.ContentType, "application/json");
@@ -67,7 +91,10 @@ namespace GameAggregator.EGames
 
             egGetGameClient = new WebClient() { BaseAddress = egProductUrl };
             egGetGameClient.Encoding = Encoding.UTF8;
+
         }
+
+        #region Store games
 
         /// <summary>
         /// Получает список игр из магазина Epic Games. Возвращает null при выходе startIndex за пределы количества игр в полном списке
@@ -77,9 +104,9 @@ namespace GameAggregator.EGames
         /// <param name="sortBy">Ключ сортировки</param>
         /// <param name="sortDir">Порядок сортировки</param>
         /// <returns>Список игр</returns>
-        public static List<EGame> GetStoreGames(int startIndex = 0, int count = 30, EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
+        public List<IEGameStore> GetStoreGames(int startIndex = 0, int count = 30, EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
         {
-            var games = new List<EGame>();
+            var games = new List<IEGameStore>();
 
             string productMappingResponce = egProductMappingClient.DownloadString("");
             var jMap = JObject.Parse(productMappingResponce).Properties();
@@ -123,7 +150,7 @@ namespace GameAggregator.EGames
                 string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
                 string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
 
-                var game = new EGameFull()
+                var game = new EGame()
                 {
                     Name = name,
                     Id = id,
@@ -149,9 +176,9 @@ namespace GameAggregator.EGames
         /// </summary>
         /// <param name="game">Игра, для которой нужно получить дополнительную информацию</param>
         /// <returns>EGameFull объект - расширение над переданным объектом game</returns>
-        public static EGameFull GetGameInfo(EGame game)
+        public IEGameStoreFull GetGameInfo(EGame game)
         {
-            var gameInfo = game as EGameFull;
+            var gameInfo = game as IEGameStoreFull;
 
             string responce = egGetGameClient.DownloadString(game.UrlName);
             var jObj = JObject.Parse(responce);
@@ -164,7 +191,7 @@ namespace GameAggregator.EGames
 
             gameInfo.Date = data["meta"]?["releaseDate"]?.ToObject<DateTime>();
             gameInfo.DateStr = gameInfo.Date?.ToShortDateString() ?? "–";
-            if(gameInfo.Date == null && data["meta"]?["customReleaseDate"] != null)
+            if (gameInfo.Date == null && data["meta"]?["customReleaseDate"] != null)
                 gameInfo.DateStr = data["meta"]["customReleaseDate"].ToString();
 
             gameInfo.Languages = "–";
@@ -197,5 +224,75 @@ namespace GameAggregator.EGames
                 img = Image.FromStream(stream);
             return img;
         }
+
+        #endregion
+
+        #region Installed games
+
+        /// <summary>
+        /// Возвращает список установленных игр
+        /// </summary>
+        /// <returns>Cписок объектов IEGameInstalled</returns>
+        public List<IEGameInstalled> GetInstalledGames()
+        {
+            try
+            {
+                string dataPath = "";
+                using (RegistryKey dataKey = Registry.LocalMachine.OpenSubKey(dataRegistryKey))
+                {
+                    dataPath = dataKey.GetValue(dataRegistryName) as string;
+                }
+
+                if (dataPath == null || !Directory.Exists(Path.Combine(dataPath, "Manifests")))
+                    return null;
+
+                List<IEGameInstalled> games = new List<IEGameInstalled>();
+                foreach (var file in Directory.GetFiles(Path.Combine(dataPath, "Manifests")))
+                {
+                    string fileContent = "";
+                    using (StreamReader reader = new StreamReader(file))
+                    {
+                        fileContent = reader.ReadToEnd();
+                    }
+
+                    var jObj = JObject.Parse(fileContent);
+
+                    var game = new EGame()
+                    {
+                        Name = jObj["DisplayName"].ToString(),
+                        Id = jObj["CatalogItemId"].ToString(),
+                        Namespace = jObj["CatalogNamespace"].ToString(),
+                        ExePath = Path.Combine(jObj["InstallLocation"].ToString(), jObj["LaunchExecutable"].ToString()),
+                        LaunchName = jObj["MainGameAppName"].ToString()
+                    };
+
+                    games.Add(game);
+                }
+
+                return games;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Запускает выбранную игру
+        /// </summary>
+        /// <param name="game">Объект установленной игры</param>
+        public void LaunchGame(IEGameInstalled game)
+        {
+            try
+            {
+                Process.Start(string.Format(LaunchString, game.LaunchName));
+            }
+            catch
+            {
+                throw new Exception($"Не удалось запустить игру {game.Name}");
+            }
+        }
+
+        #endregion
     }
 }

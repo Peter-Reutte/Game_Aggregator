@@ -257,6 +257,9 @@ namespace GameAggregator.EGames
 
                     var jObj = JObject.Parse(fileContent);
 
+                    if (string.IsNullOrEmpty(jObj["LaunchExecutable"].ToString()))
+                        continue;
+
                     var game = new EGame()
                     {
                         Name = jObj["DisplayName"].ToString(),

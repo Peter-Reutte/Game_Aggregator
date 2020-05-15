@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using GameAggregator.EGames.Models;
@@ -76,7 +77,8 @@ namespace GameAggregator.EGames
 
         #endregion
 
-        private readonly string LaunchString = @"com.epicgames.launcher://apps/{0}?action=launch&silent=true";
+        private readonly string launchString = @"com.epicgames.launcher://apps/{0}?action=launch&silent=true";
+        private readonly string productMappingCacheKey = "epicgames_productmapping";
 
         #endregion
 
@@ -110,8 +112,14 @@ namespace GameAggregator.EGames
         {
             var games = new List<IEGameStore>();
 
-            string productMappingResponce = egProductMappingClient.DownloadString("");
-            var jMap = JObject.Parse(productMappingResponce).Properties();
+            MemoryCache memCache = MemoryCache.Default;
+            if (!memCache.Contains(productMappingCacheKey))
+            {
+                string productMappingResponce = egProductMappingClient.DownloadString("");
+                var jMapProd = JObject.Parse(productMappingResponce);
+                memCache.Set(productMappingCacheKey, jMapProd, DateTimeOffset.Now.AddDays(7.0));
+            }
+            var jMap = (memCache.Get(productMappingCacheKey) as JObject).Properties();
 
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
@@ -290,7 +298,7 @@ namespace GameAggregator.EGames
         {
             try
             {
-                Process.Start(string.Format(LaunchString, game.LaunchName));
+                Process.Start(string.Format(launchString, game.LaunchName));
             }
             catch
             {

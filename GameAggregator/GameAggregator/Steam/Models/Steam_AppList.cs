@@ -4,14 +4,10 @@ namespace GameAggregator.SteamStore
 {
     public class SteamGame
     {
-        /// <summary>
-        /// AppID игры
-        /// </summary>
-        public int Appid { get; set; }
+        /// <summary>AppID игры</summary>
+        public string Appid { get; set; }
 
-        /// <summary>
-        /// Наименование игры
-        /// </summary>
+        /// <summary>Наименование игры</summary>
         public string Name { get; set; }
     }
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace GameAggregator.UplayStore
 {
@@ -12,7 +13,17 @@ namespace GameAggregator.UplayStore
         /// <summary>
         /// Запускает выбранную игру
         /// </summary>
-        /// <param name="game">AppID игры</param>
-        public void LaunchGame(string appid) => Process.Start(@"uplay://launch/" + appid);
+        /// <param name="appid">AppID игры</param>
+        public void LaunchGame(string appid)
+        {
+            try
+            {
+                Process.Start(@"uplay://launch/" + appid);
+            }
+            catch
+            {
+                MessageBox.Show("Клиент Uplay не установлен!");
+            }
+        }
     }
 }

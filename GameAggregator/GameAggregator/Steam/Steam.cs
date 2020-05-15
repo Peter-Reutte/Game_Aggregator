@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Runtime.Caching;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace GameAggregator.SteamStore
 {
@@ -22,14 +23,14 @@ namespace GameAggregator.SteamStore
             SteamWebClient = new WebClient();
 
             //временно -- Steam Web API key
-            StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
-            Key = sr.ReadLine();
-            sr.Close();
+            //StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
+            //Key = sr.ReadLine();
+            //sr.Close();
 
 
             //для теста; нужно будет убрать в хорошее место
             //string price = GetGamePrice("Borderlands 3");
-            Steam_OwnedGameList list = GetOwnedGamesList("https://steamcommunity.com/profiles/76561198254132723"); //Dingo's profile (temp)
+            //Steam_OwnedGameList list = GetOwnedGamesList("https://steamcommunity.com/profiles/76561198254132723"); //Dingo's profile (temp)
             //Image image = GetGameIcon(list.Response.Games[0]);
             //image.Save("test.jpg", ImageFormat.Jpeg);
             //LaunchGame(list.Response.Games[0].Appid);
@@ -152,8 +153,8 @@ namespace GameAggregator.SteamStore
             byte[] data;
             try
             {
-                data = SteamWebClient.DownloadData("http://media.steampowered.com/steamcommunity/public/images/apps/" +
-                    + game.Appid + "/" + game.Img_icon_url + ".jpg");
+                data = SteamWebClient.DownloadData("http://media.steampowered.com/steamcommunity/public/images/apps/" + 
+                    game.Appid + "/" + game.Img_icon_url + ".jpg");
             }
             catch
             {
@@ -167,8 +168,18 @@ namespace GameAggregator.SteamStore
         /// Запускает выбранную игру; нужен установленный Steam-клиент
         /// Если игра не установлена -- запускает установку
         /// </summary>
-        /// <param name="game">Игра для запуска</param>
-        public void LaunchGame(int appid) => Process.Start("steam://rungameid/" + appid.ToString());
+        /// <param name="appid">AppID игры</param>
+        public void LaunchGame(string appid)
+        {
+            try
+            {
+                Process.Start("steam://rungameid/" + appid);
+            }
+            catch
+            {
+                MessageBox.Show("Клиент Steam не установлен!");
+            }
+        }
     }
 }
 

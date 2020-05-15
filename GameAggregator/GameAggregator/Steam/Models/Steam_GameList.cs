@@ -4,9 +4,7 @@ namespace GameAggregator.SteamStore
 {
     public class OwnedGame : SteamGame
     {
-        /// <summary>
-        /// Время в игре
-        /// </summary>
+        /// <summary>Время в игре</summary>
         public int Playtime_forever { get; set; }
 
         /// <summary>
@@ -30,14 +28,10 @@ namespace GameAggregator.SteamStore
 
     public class Response
     {
-        /// <summary>
-        /// Количество игр на аккаунте
-        /// </summary>
+        /// <summary>Количество игр на аккаунте</summary>
         public int Game_count { get; set; }
 
-        /// <summary>
-        /// Список игр
-        /// </summary>
+        /// <summary>Список игр</summary>
         public IList<OwnedGame> Games { get; set; }
     }
 

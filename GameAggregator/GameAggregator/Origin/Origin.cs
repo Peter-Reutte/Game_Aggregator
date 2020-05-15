@@ -17,7 +17,7 @@ namespace GameAggregator.OriginStore
         /// <summary>
         /// Поиск игр в магазине Origin
         /// </summary>
-        /// <param name="name">Название длдя поиска</param>
+        /// <param name="name">Название для поиска</param>
         /// <returns>Список найденных вариантов (включая базовые игры, DLC и проч.)</returns>
         public List<OriginGame> GetLinksToOriginGames(string name)
         {
@@ -48,14 +48,14 @@ namespace GameAggregator.OriginStore
         /// <summary>
         /// Запускает выбранную игру
         /// </summary>
-        /// <param name="game">Путь к exe-файу, запускающему игру</param>
+        /// <param name="link">Путь к exe-файу, запускающему игру</param>
         public void LaunchGame(string link)
         {
             try
             {
                 Process.Start(link);
             }
-            catch //Если exe-файл игры нестандартный, запускается сам Origin
+            catch //Если exe-файл игры нестандартный, запускается сам Origin; если Origin не установлен -- ничего
             {
                 string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
                 RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
@@ -73,6 +73,7 @@ namespace GameAggregator.OriginStore
                             if (title == "Origin")
                             {
                                 Process.Start(installLocation + "Origin.exe");
+                                break;
                             }
                         }
                         catch { continue; }

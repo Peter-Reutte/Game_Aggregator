@@ -15,6 +15,10 @@ namespace GameAggregator.InstalledSearch
             //Search_UplayInstalled();
         }
 
+        /// <summary>
+        /// Поиск установленных игр Steam
+        /// </summary>
+        /// <returns>Список установленных игр, с AppID, названиями и директорией установки</returns>
         private static List<Steam_InstalledGame> Search_SteamInstalled()
         {
             string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
@@ -83,13 +87,17 @@ namespace GameAggregator.InstalledSearch
                         }
                     }
 
-                    steam_InstalledGames.Add(new Steam_InstalledGame(int.Parse(appid), name, directory));
+                    steam_InstalledGames.Add(new Steam_InstalledGame(appid, name, directory));
                 }
             }
 
             return steam_InstalledGames;
         }
 
+        /// <summary>
+        /// Поиск установленных игр Origin
+        /// </summary>
+        /// <returns>Список установленных игр, с названиями, директорией установки и адресом (вероятного) запускающего файла</returns>
         private static List<Origin_InstalledGame> Search_OriginInstalled()
         {
             List<Origin_InstalledGame> originGames = new List<Origin_InstalledGame>();
@@ -122,11 +130,24 @@ namespace GameAggregator.InstalledSearch
             return originGames;
         }
 
+        /// <summary>
+        /// Поиск установленных игр Uplay
+        /// </summary>
+        /// <returns>Список установленных игр, с AppID, названиями и директорией установки</returns>
         private static List<Uplay_InstalledGame> Search_UplayInstalled()
         {
             List<Uplay_InstalledGame> uplayGames = new List<Uplay_InstalledGame>();
             string regkey = "SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs";
-            RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+            RegistryKey key;
+            try
+            {
+                key = Registry.LocalMachine.OpenSubKey(regkey);
+            }
+            catch
+            {
+                throw new Exception("Uplay не установлен?");
+            }
+
             foreach (string ksubKey in key.GetSubKeyNames())
             {
                 string dir = "", name = "";

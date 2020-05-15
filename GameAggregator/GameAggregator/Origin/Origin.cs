@@ -3,7 +3,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Runtime.Caching;
+using System.Text;
 
 namespace GameAggregator.OriginStore
 {
@@ -11,7 +14,7 @@ namespace GameAggregator.OriginStore
     {
         private readonly WebClient OriginWebClient;
 
-        public Origin() => OriginWebClient = new WebClient();
+        public Origin() => OriginWebClient = new WebClient() { Encoding = Encoding.UTF8 };
 
 
         /// <summary>
@@ -21,9 +24,21 @@ namespace GameAggregator.OriginStore
         /// <returns>Список найденных вариантов (включая базовые игры, DLC и проч.)</returns>
         public List<OriginGame> GetLinksToOriginGames(string name)
         {
+            JObject jData;
             string responce;
             try
             {
+                string cacheKey = "originstoreitems";
+                MemoryCache memCache = MemoryCache.Default;
+                if (!memCache.Contains(cacheKey))
+                {
+                    string jsonStoreDataUrl = "https://api4.origin.com/supercat/RU/en_RU/supercat-PCWIN_MAC-RU-en_RU.json.gz";
+                    string jDataResponce = OriginWebClient.DownloadString(jsonStoreDataUrl);
+                    jData = JObject.Parse(jDataResponce);
+                    memCache.Set(cacheKey, jData, DateTimeOffset.Now.AddDays(7.0));
+                }
+                jData = memCache.Get(cacheKey) as JObject;
+
                 responce = OriginWebClient.DownloadString("https://api4.origin.com/xsearch/store/en_us/rus/products?searchTerm="
                     + name + "&sort=rank desc,releaseDate desc,title desc&start=0&rows=20&isGDP=true");
             }
@@ -38,7 +53,24 @@ namespace GameAggregator.OriginStore
             {
                 foreach (JToken token in jsonObj["games"]["game"].Children())
                 {
-                    links.Add(new OriginGame(token["gameName"].ToString(), token["path"].ToString()));
+                    //Поиск в json-базе объектов с OfferPath, указанных в поле children
+                    string[] gamePaths = token["children"].ToString().Split(',');
+                    var withSamePaths = (jData["offers"] as JArray).Where(x => gamePaths.Contains(x["offerPath"].ToString()));
+                    //Выбор тех вариантов, для которых указана цена
+                    var withPrice = withSamePaths.Where(x => x["countries"]["catalogPrice"].ToString() != "");
+                    if (withPrice.Count() > 1)
+                    {
+                        //Если несколько версий, берем standard-edition, если она есть
+                        var standardEdition = withPrice.Where(x => x["offerPath"].ToString().Contains("standard-edition"));
+                        if (standardEdition.Count() != 0)
+                            withPrice = standardEdition;
+                    }
+                    //Выводим только минимальную цену, если нет standard edition?
+                    //Такое в основном у валюты и игр с кастомными названиями изданий
+                    //Если не удалось извлечь цену, на всякий случай указывается -1, хотя у всех текущих позиций цена есть
+                    double price = withPrice.Count() == 0 ? -1 : withPrice.Select(x => x["countries"]["catalogPrice"].Value<double>()).Min();
+
+                    links.Add(new OriginGame(token["gameName"].ToString(), token["path"].ToString(), price));
                 }
             }
 

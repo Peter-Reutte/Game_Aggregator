@@ -64,7 +64,7 @@ namespace GameAggregator.EGames
 
         #region Queries
 
-        private string storeQueryVariables = "\"variables\":{{\"category\":\"games/edition/base|bundles/games|editors\",\"count\":{0},\"country\":\"RU\",\"keywords\":\"\",\"locale\":\"ru\",\"sortBy\":\"{1}\",\"sortDir\":\"{2}\",\"start\":{3},\"tag\":\"\",\"allowCountries\":\"RU\",\"withPrice\":true";
+        private string storeQueryVariables = "\"variables\":{{\"category\":\"games/edition/base|bundles/games|editors\",\"count\":{0},\"country\":\"RU\",\"keywords\":\"{1}\",\"locale\":\"ru\",\"sortBy\":\"{2}\",\"sortDir\":\"{3}\",\"start\":{4},\"tag\":\"\",\"allowCountries\":\"RU\",\"withPrice\":true";
         private string storeQuery = "{{\"query\":\"query searchStoreQuery($allowCountries: String, $category: String, $count: Int, $country: String!, $keywords: String, $locale: String, $namespace: String, $sortBy: String, $sortDir: String, $start: Int, $tag: String, $withPrice: Boolean = false, $withPromotions: Boolean = false) {{\\n  Catalog {{\\n    searchStore(allowCountries: $allowCountries, category: $category, count: $count, country: $country, keywords: $keywords, locale: $locale, namespace: $namespace, sortBy: $sortBy, sortDir: $sortDir, start: $start, tag: $tag) {{\\n      elements {{\\n        title\\n        id\\n        namespace\\n        description\\n        effectiveDate\\n        keyImages {{\\n          type\\n          url\\n        }}\\n        seller {{\\n          id\\n          name\\n        }}\\n        productSlug\\n        urlSlug\\n        url\\n        items {{\\n          id\\n          namespace\\n        }}\\n        customAttributes {{\\n          key\\n          value\\n        }}\\n        categories {{\\n          path\\n        }}\\n        price(country: $country) @include(if: $withPrice) {{\\n          totalPrice {{\\n            discountPrice\\n            originalPrice\\n            voucherDiscount\\n            discount\\n            currencyCode\\n            currencyInfo {{\\n              decimals\\n            }}\\n            fmtPrice(locale: $locale) {{\\n              originalPrice\\n              discountPrice\\n              intermediatePrice\\n            }}\\n          }}\\n          lineOffers {{\\n            appliedRules {{\\n              id\\n              endDate\\n              discountSetting {{\\n                discountType\\n              }}\\n            }}\\n          }}\\n        }}\\n        promotions(category: $category) @include(if: $withPromotions) {{\\n          promotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n          upcomingPromotionalOffers {{\\n            promotionalOffers {{\\n              startDate\\n              endDate\\n              discountSetting {{\\n                discountType\\n                discountPercentage\\n              }}\\n            }}\\n          }}\\n        }}\\n      }}\\n      paging {{\\n        count\\n        total\\n      }}\\n    }}\\n  }}\\n}}\\n\",{0}}}}}";
 
         #endregion
@@ -97,14 +97,16 @@ namespace GameAggregator.EGames
         #region Store games
 
         /// <summary>
-        /// Получает список игр из магазина Epic Games. Возвращает null при выходе startIndex за пределы количества игр в полном списке
+        /// Получает список игр из магазина Epic Games, в том числе производит поиск по ключевому слову.
+        /// Возвращает null при выходе startIndex за пределы количества игр в полном списке
         /// </summary>
         /// <param name="startIndex">Позиция, с которой необходимо получить список игр</param>
         /// <param name="count">Количество игр начиная со startIndex, которое необходимо получить</param>
         /// <param name="sortBy">Ключ сортировки</param>
         /// <param name="sortDir">Порядок сортировки</param>
+        /// <param name="keyword">Ключевое слово поиска (название)</param>
         /// <returns>Список игр</returns>
-        public List<IEGameStore> GetStoreGames(int startIndex = 0, int count = 30, EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
+        public List<IEGameStore> GetStoreGames(int startIndex = 0, int count = 30, string keyword = "", EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
         {
             var games = new List<IEGameStore>();
 
@@ -113,7 +115,7 @@ namespace GameAggregator.EGames
 
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
-            string variablesQuery = string.Format(storeQueryVariables, count, sortByStr, sortDirStr, startIndex);
+            string variablesQuery = string.Format(storeQueryVariables, count, keyword, sortByStr, sortDirStr, startIndex);
             string query = string.Format(storeQuery, variablesQuery);
 
             string responce = egBackendClient.UploadString("", query);

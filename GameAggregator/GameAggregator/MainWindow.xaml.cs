@@ -24,5 +24,20 @@ namespace GameAggregator
         {
             InitializeComponent();
         }
+
+        private void BtnLibrary_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("work");
+        }
+
+        private void BtnShop_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnManageAccounts_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

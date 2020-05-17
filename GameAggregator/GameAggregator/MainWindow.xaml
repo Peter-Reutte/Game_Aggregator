@@ -9,9 +9,10 @@
     <Window.Resources>
         <!--Стили кнопок-->
         <Style TargetType="Button">
+            <Setter Property="Control.FontFamily" Value="Bahnschrift Condenced"/>
             <Setter Property="Control.VerticalAlignment" Value="Center"/>
             <Setter Property="Control.HorizontalAlignment" Value="Center"/>
-            <Setter Property="Control.FontSize" Value="16"/>
+            <Setter Property="Control.FontSize" Value="17"/>
             <Setter Property="Control.Margin" Value="10"/>
             <Setter Property="Control.Height" Value="45"/>
             <Setter Property="Control.Width" Value="255"/>
@@ -84,11 +85,15 @@
         <Grid Grid.Column="1" >
             <Grid.Background>
                 <LinearGradientBrush EndPoint="1,0" StartPoint="1,1">
-                    <GradientStop Color="#373737" Offset="0"/>
+                    <GradientStop Color="#1E1E1E" Offset="0"/>
                     <GradientStop Color="#AAA" Offset="1"/>
                 </LinearGradientBrush>
             </Grid.Background>
-            <Frame x:Name="frameMain" Margin="10" NavigationUIVisibility="Hidden"/>
+            <Border BorderThickness="3" BorderBrush="#42AAFF" Margin="10" >
+                <Grid Opacity="0.5" Background="Black">
+                    <Frame x:Name="mainFrame" Margin="10" NavigationUIVisibility="Hidden"/>
+            </Grid>
+        </Border>
         </Grid>
     </Grid>
 </Window>

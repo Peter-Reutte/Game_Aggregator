@@ -20,24 +20,28 @@ namespace GameAggregator
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static Frame MainFrame { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
+            MainFrame = mainFrame;
+            MainFrame.Content = new HomePage();
         }
 
         private void BtnLibrary_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("work");
+            MainFrame.Content = new LibraryPage();
         }
 
         private void BtnShop_Click(object sender, RoutedEventArgs e)
         {
-
+            MainFrame.Content = new ShopAggregatorPage();
         }
 
         private void BtnManageAccounts_Click(object sender, RoutedEventArgs e)
         {
-
+            MainFrame.Content = new AccountsPage();
         }
     }
 }

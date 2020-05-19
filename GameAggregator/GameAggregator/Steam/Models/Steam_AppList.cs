@@ -16,6 +16,9 @@ namespace GameAggregator.SteamStore
         public List<SteamGame> Apps { get; set; }
     }
 
+    /// <summary>
+    /// Для скачивания базы AppId игр
+    /// </summary>
     public class Steam_AppList
     {
         public Applist Applist { get; set; }

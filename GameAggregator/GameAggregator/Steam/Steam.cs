@@ -2,14 +2,13 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Runtime.Caching;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows;
 
 namespace GameAggregator.SteamStore
 {
@@ -20,7 +19,7 @@ namespace GameAggregator.SteamStore
 
         public Steam()
         {
-            SteamWebClient = new WebClient();
+            SteamWebClient = new WebClient() { Encoding = Encoding.UTF8 };
 
             //временно -- Steam Web API key
             //StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
@@ -33,7 +32,6 @@ namespace GameAggregator.SteamStore
             //Steam_OwnedGameList list = GetOwnedGamesList("https://steamcommunity.com/profiles/76561198254132723"); //Dingo's profile (temp)
             //Image image = GetGameIcon(list.Response.Games[0]);
             //image.Save("test.jpg", ImageFormat.Jpeg);
-            //LaunchGame(list.Response.Games[0].Appid);
         }
 
         /// <summary>
@@ -162,23 +160,6 @@ namespace GameAggregator.SteamStore
             }
 
             return Image.FromStream(new MemoryStream(data));
-        }
-
-        /// <summary>
-        /// Запускает выбранную игру; нужен установленный Steam-клиент
-        /// Если игра не установлена -- запускает установку
-        /// </summary>
-        /// <param name="appid">AppID игры</param>
-        public void LaunchGame(string appid)
-        {
-            try
-            {
-                Process.Start("steam://rungameid/" + appid);
-            }
-            catch
-            {
-                MessageBox.Show("Клиент Steam не установлен!");
-            }
         }
     }
 }

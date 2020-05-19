@@ -19,7 +19,7 @@ namespace GameAggregator.InstalledSearch
         /// Поиск установленных игр Steam
         /// </summary>
         /// <returns>Список установленных игр, с AppID, названиями и директорией установки</returns>
-        private static List<Steam_InstalledGame> Search_SteamInstalled()
+        private static List<IInstalledGame> Search_SteamInstalled()
         {
             string steam64 = "SOFTWARE\\Wow6432Node\\Valve\\";
             string steam64path;
@@ -60,7 +60,7 @@ namespace GameAggregator.InstalledSearch
                 throw new Exception("Steam не установлен?");
             }
 
-            List<Steam_InstalledGame> steam_InstalledGames = new List<Steam_InstalledGame>();
+            List<IInstalledGame> steam_InstalledGames = new List<IInstalledGame>();
             foreach (string dir in steamGameDirs)
             {
                 foreach (FileInfo file in new DirectoryInfo(dir).GetFiles("appmanifest_*.acf"))
@@ -87,10 +87,9 @@ namespace GameAggregator.InstalledSearch
                         }
                     }
 
-                    steam_InstalledGames.Add(new Steam_InstalledGame(appid, name, directory));
+                    steam_InstalledGames.Add(new Steam_InstalledGame(name, "steam://rungameid/" + appid, Launchers.Steam));
                 }
             }
-
             return steam_InstalledGames;
         }
 
@@ -98,9 +97,9 @@ namespace GameAggregator.InstalledSearch
         /// Поиск установленных игр Origin
         /// </summary>
         /// <returns>Список установленных игр, с названиями, директорией установки и адресом (вероятного) запускающего файла</returns>
-        private static List<Origin_InstalledGame> Search_OriginInstalled()
+        private static List<IInstalledGame> Search_OriginInstalled()
         {
-            List<Origin_InstalledGame> originGames = new List<Origin_InstalledGame>();
+            List<IInstalledGame> originGames = new List<IInstalledGame>();
             string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
             RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
             foreach (string ksubKey in key.GetSubKeyNames())
@@ -115,14 +114,14 @@ namespace GameAggregator.InstalledSearch
                     }
                     catch { continue; }
 
-                    string title = subKey.GetValue("DisplayName").ToString();
-                    if (title == "Origin") continue;
+                    string name = subKey.GetValue("DisplayName").ToString();
+                    if (name == "Origin") continue;
 
                     string installLocation = subKey.GetValue("InstallLocation").ToString();
 
-                    if (!originGames.Exists(x => x.Name == title))
+                    if (!originGames.Exists(x => x.Name == name))
                     {
-                        originGames.Add(new Origin_InstalledGame(title, installLocation));
+                        originGames.Add(new Origin_InstalledGame(name, installLocation + name + ".exe", Launchers.Origin));
                     }
                 }
             }
@@ -134,9 +133,9 @@ namespace GameAggregator.InstalledSearch
         /// Поиск установленных игр Uplay
         /// </summary>
         /// <returns>Список установленных игр, с AppID, названиями и директорией установки</returns>
-        private static List<Uplay_InstalledGame> Search_UplayInstalled()
+        private static List<IInstalledGame> Search_UplayInstalled()
         {
-            List<Uplay_InstalledGame> uplayGames = new List<Uplay_InstalledGame>();
+            List<IInstalledGame> uplayGames = new List<IInstalledGame>();
             string regkey = "SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs";
             RegistryKey key;
             try
@@ -157,7 +156,7 @@ namespace GameAggregator.InstalledSearch
                     name = dir.Remove(dir.Length - 1);
                     name = name.Substring(name.LastIndexOf('/') + 1);
                 }
-                uplayGames.Add(new Uplay_InstalledGame(name, dir, ksubKey));
+                uplayGames.Add(new Uplay_InstalledGame(name, @"uplay://launch/" + ksubKey, Launchers.Uplay));
             }
 
             return uplayGames;

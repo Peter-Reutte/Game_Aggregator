@@ -1,76 +1,130 @@
-﻿using GameAggregator.SteamStore;
+﻿using Microsoft.Win32;
+using System.Diagnostics;
+using System.Windows;
 
 namespace GameAggregator.InstalledSearch
 {
-    /// <summary>
-    /// Модель установленной игры Steam
-    /// Можно запустить, используя метод Steam.LaunchGame, передав параметр Appid
-    /// </summary>
-    public class Steam_InstalledGame : SteamGame
+    public enum Launchers
     {
-        /// <summary>Расположение установки</summary>
-        public string Directory { get; set; }
+        Steam,
+        EpicGames,
+        Origin,
+        Uplay,
+        Other
+    }
 
-        /// <summary>
-        /// Информация об установленной игре Uplay
-        /// </summary>
-        /// <param name="name">Название</param>
-        /// <param name="directory">Расположение установки</param>
-        /// <param name="appid">AppID</param>
-        public Steam_InstalledGame(string appid, string name, string directory)
+    /// <summary>Описание установленной игры</summary>
+    public interface IInstalledGame
+    {
+        /// <summary>Название игры</summary>
+        string Name { get; set; }
+
+        /// <summary>Строка для запуска игры</summary>
+        string LaunchString { get; set; }
+
+        /// <summary>Лаунчер, в котором приобретена игра</summary>
+        Launchers Launcher { get; set; }
+
+        /// <summary>Запуск установленной игры</summary>
+        void LaunchGame();
+    }
+
+    public class Steam_InstalledGame : IInstalledGame
+    {
+        public string Name { get; set; }
+        public string LaunchString { get; set; }
+        public Launchers Launcher { get; set; }
+
+        public Steam_InstalledGame(string name, string launchString, Launchers launcher)
         {
-            Appid = appid;
             Name = name;
-            Directory = directory;
+            LaunchString = launchString;
+            Launcher = launcher;
+        }
+
+        public void LaunchGame()
+        {
+            try
+            {
+                Process.Start(LaunchString);
+            }
+            catch
+            {
+                MessageBox.Show("Клиент Steam не установлен!");
+            }
         }
     }
 
-    public class Origin_InstalledGame
+    public class Origin_InstalledGame : IInstalledGame
     {
-        /// <summary>Название игры</summary>
         public string Name { get; set; }
+        public string LaunchString { get; set; }
+        public Launchers Launcher { get; set; }
 
-        /// <summary>Расположение установки</summary>
-        public string Directory { get; set; }
-
-        /// <summary>(Вероятный) Запускающий exe-файл</summary>
-        public string LaunchExe { get; set; }
-
-        /// <summary>
-        /// Информация об установленной игре origin
-        /// </summary>
-        /// <param name="name">Название</param>
-        /// <param name="directory">Расположение установки</param>
-        public Origin_InstalledGame(string name, string directory)
+        public Origin_InstalledGame(string name, string launchString, Launchers launcher)
         {
             Name = name;
-            Directory = directory;
-            LaunchExe = directory + name + ".exe";
+            LaunchString = launchString;
+            Launcher = launcher;
+        }
+
+        public void LaunchGame()
+        {
+            try
+            {
+                Process.Start(LaunchString);
+            }
+            catch //Если exe-файл игры нестандартный, запускается сам Origin; если Origin не установлен -- ничего
+            {
+                string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+                RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+                foreach (string ksubKey in key.GetSubKeyNames())
+                {
+                    using (RegistryKey subKey = key.OpenSubKey(ksubKey))
+                    {
+                        string publisher = "";
+                        try
+                        {
+                            publisher = subKey.GetValue("Publisher").ToString();
+                            if (!publisher.Contains("Electronic Arts")) continue;
+                            string title = subKey.GetValue("DisplayName").ToString();
+                            string installLocation = subKey.GetValue("InstallLocation").ToString();
+                            if (title == "Origin")
+                            {
+                                Process.Start(installLocation + "Origin.exe");
+                                break;
+                            }
+                        }
+                        catch { continue; }
+                    }
+                }
+            }
         }
     }
 
-    public class Uplay_InstalledGame
+    public class Uplay_InstalledGame : IInstalledGame
     {
-        /// <summary>Название игры</summary>
         public string Name { get; set; }
+        public string LaunchString { get; set; }
+        public Launchers Launcher { get; set; }
 
-        /// <summary>Расположение установки</summary>
-        public string Directory { get; set; }
-
-        /// <summary>AppID игры</summary>
-        public string Appid { get; set; }
-
-        /// <summary>
-        /// Информация об установленной игре Uplay
-        /// </summary>
-        /// <param name="name">Название</param>
-        /// <param name="directory">Расположение установки</param>
-        /// <param name="appid">AppID</param>
-        public Uplay_InstalledGame(string name, string directory, string appid)
+        public Uplay_InstalledGame(string name, string launchString, Launchers launcher)
         {
             Name = name;
-            Directory = directory;
-            Appid = appid;
+            LaunchString = launchString;
+            Launcher = launcher;
+        }
+
+        public void LaunchGame()
+        {
+            try
+            {
+                Process.Start(LaunchString);
+            }
+            catch
+            {
+                MessageBox.Show("Клиент Uplay не установлен!");
+            }
         }
     }
 }

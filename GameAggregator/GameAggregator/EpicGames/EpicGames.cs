@@ -72,12 +72,12 @@ namespace GameAggregator.EGames
 
         #region Registry
 
-        private readonly string dataRegistryKey = @"SOFTWARE\Epic Games\EpicGamesLauncher";
-        private readonly string dataRegistryName = "AppDataPath";
+        private static readonly string dataRegistryKey = @"SOFTWARE\Epic Games\EpicGamesLauncher";
+        private static readonly string dataRegistryName = "AppDataPath";
 
         #endregion
 
-        private readonly string launchString = @"com.epicgames.launcher://apps/{0}?action=launch&silent=true";
+        private static readonly string launchString = @"com.epicgames.launcher://apps/{0}?action=launch&silent=true";
         private readonly string productMappingCacheKey = "epicgames_productmapping";
 
         #endregion
@@ -282,7 +282,7 @@ namespace GameAggregator.EGames
         /// Возвращает список установленных игр
         /// </summary>
         /// <returns>Cписок объектов IEGameInstalled</returns>
-        public List<IInstalledGame> GetInstalledGames()
+        public static List<IInstalledGame> Search_EpicGamesInstalled()
         {
             try
             {
@@ -327,11 +327,11 @@ namespace GameAggregator.EGames
         /// Запускает выбранную игру
         /// </summary>
         /// <param name="game">Объект установленной игры</param>
-        public void LaunchGame(IEGameInstalled game)
+        public void LaunchGame(IInstalledGame game)
         {
             try
             {
-                Process.Start(string.Format(launchString, game.LaunchName));
+                Process.Start(game.LaunchString);
             }
             catch
             {

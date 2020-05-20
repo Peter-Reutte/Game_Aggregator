@@ -82,7 +82,7 @@ namespace GameAggregator.OriginStore
         /// Поиск установленных игр Origin
         /// </summary>
         /// <returns>Список установленных игр, с названиями, директорией установки и адресом (вероятного) запускающего файла</returns>
-        private static List<IInstalledGame> Search_OriginInstalled()
+        public static List<IInstalledGame> Search_OriginInstalled()
         {
             List<IInstalledGame> originGames = new List<IInstalledGame>();
             string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";

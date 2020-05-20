@@ -12,6 +12,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GameAggregator.EGames;
+using GameAggregator.OriginStore;
+using GameAggregator.SteamStore;
+using GameAggregator.UplayStore;
 
 namespace GameAggregator
 {
@@ -23,6 +27,34 @@ namespace GameAggregator
         public LibraryPage()
         {
             InitializeComponent();
+        }
+
+        public List<IInstalledGame> GetAllGames()
+        {
+            List<IInstalledGame> installedGames = new List<IInstalledGame>();
+            try
+            {
+                installedGames.AddRange(EpicGames.Search_EpicGamesInstalled());
+            }
+            catch { }
+            try
+            {
+                installedGames.AddRange(Origin.Search_OriginInstalled());
+            }
+            catch { }
+            try
+            {
+                installedGames.AddRange(Steam.Search_SteamInstalled());
+            }
+            catch { }
+            try
+            {
+                installedGames.AddRange(Uplay.Search_UplayInstalled());
+            }
+            catch { }
+
+            installedGames.Sort((g1, g2) => g1.Name.CompareTo(g2.Name));
+            return installedGames;
         }
     }
 

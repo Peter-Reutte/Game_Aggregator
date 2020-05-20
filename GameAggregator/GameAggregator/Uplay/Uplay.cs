@@ -15,7 +15,7 @@ namespace GameAggregator.UplayStore
         /// Поиск установленных игр Uplay
         /// </summary>
         /// <returns>Список установленных игр, с AppID, названиями и директорией установки</returns>
-        private static List<IInstalledGame> Search_UplayInstalled()
+        public static List<IInstalledGame> Search_UplayInstalled()
         {
             List<IInstalledGame> uplayGames = new List<IInstalledGame>();
             string regkey = "SOFTWARE\\WOW6432Node\\Ubisoft\\Launcher\\Installs";

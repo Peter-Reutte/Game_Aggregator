@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,11 @@ namespace GameAggregator.OriginStore
 
 
         /// <summary>
-        /// Поиск игр в магазине Origin
+        /// Поиск цены игры в магазине Origin
         /// </summary>
         /// <param name="name">Название для поиска</param>
         /// <returns>Список найденных вариантов (включая базовые игры, DLC и проч.)</returns>
-        public List<OriginGame> GetLinksToOriginGames(string name)
+        public List<OriginGame> GetGamePrice(string name)
         {
             JObject jData;
             string responce;
@@ -74,5 +75,45 @@ namespace GameAggregator.OriginStore
 
             return links;
         }
+
+        #region Installed games
+
+        /// <summary>
+        /// Поиск установленных игр Origin
+        /// </summary>
+        /// <returns>Список установленных игр, с названиями, директорией установки и адресом (вероятного) запускающего файла</returns>
+        private static List<IInstalledGame> Search_OriginInstalled()
+        {
+            List<IInstalledGame> originGames = new List<IInstalledGame>();
+            string regkey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall";
+            RegistryKey key = Registry.LocalMachine.OpenSubKey(regkey);
+            foreach (string ksubKey in key.GetSubKeyNames())
+            {
+                using (RegistryKey subKey = key.OpenSubKey(ksubKey))
+                {
+                    string publisher = "";
+                    try
+                    {
+                        publisher = subKey.GetValue("Publisher").ToString();
+                        if (!publisher.Contains("Electronic Arts")) continue;
+                    }
+                    catch { continue; }
+
+                    string name = subKey.GetValue("DisplayName").ToString();
+                    if (name == "Origin") continue;
+
+                    string installLocation = subKey.GetValue("InstallLocation").ToString();
+
+                    if (!originGames.Exists(x => x.Name == name))
+                    {
+                        originGames.Add(new Origin_InstalledGame(name, installLocation + name + ".exe", Launchers.Origin));
+                    }
+                }
+            }
+
+            return originGames;
+        }
+
+        #endregion
     }
 }

@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 
-namespace GameAggregator.InstalledSearch
+namespace GameAggregator
 {
     public enum Launchers
     {

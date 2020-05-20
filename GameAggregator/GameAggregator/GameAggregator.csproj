@@ -71,8 +71,7 @@
     <Compile Include="HomePage.xaml.cs">
       <DependentUpon>HomePage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="InstalledSearch\InstalledGamesSearch.cs" />
-    <Compile Include="InstalledSearch\Model\InstalledGameModels.cs" />
+    <Compile Include="Models\InstalledGameModels.cs" />
     <Compile Include="LibraryPage.xaml.cs">
       <DependentUpon>LibraryPage.xaml</DependentUpon>
     </Compile>

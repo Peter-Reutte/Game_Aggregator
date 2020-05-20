@@ -243,7 +243,7 @@ namespace GameAggregator.EGames
         /// Возвращает список установленных игр
         /// </summary>
         /// <returns>Cписок объектов IEGameInstalled</returns>
-        public List<IEGameInstalled> GetInstalledGames()
+        public List<IInstalledGame> GetInstalledGames()
         {
             try
             {
@@ -256,7 +256,7 @@ namespace GameAggregator.EGames
                 if (dataPath == null || !Directory.Exists(Path.Combine(dataPath, "Manifests")))
                     return null;
 
-                List<IEGameInstalled> games = new List<IEGameInstalled>();
+                List<IInstalledGame> games = new List<IInstalledGame>();
                 foreach (var file in Directory.GetFiles(Path.Combine(dataPath, "Manifests")))
                 {
                     string fileContent = "";
@@ -270,16 +270,10 @@ namespace GameAggregator.EGames
                     if (string.IsNullOrEmpty(jObj["LaunchExecutable"].ToString()))
                         continue;
 
-                    var game = new EGame()
-                    {
-                        Name = jObj["DisplayName"].ToString(),
-                        Id = jObj["CatalogItemId"].ToString(),
-                        Namespace = jObj["CatalogNamespace"].ToString(),
-                        ExePath = Path.Combine(jObj["InstallLocation"].ToString(), jObj["LaunchExecutable"].ToString()),
-                        LaunchName = jObj["MainGameAppName"].ToString()
-                    };
+                    var name = jObj["DisplayName"].ToString();
+                    var launchStr = string.Format(launchString, jObj["MainGameAppName"].ToString());
 
-                    games.Add(game);
+                    games.Add(new EpicGames_InstalledGame(name, launchStr));
                 }
 
                 return games;

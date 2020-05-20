@@ -127,4 +127,31 @@ namespace GameAggregator
             }
         }
     }
+
+    public class EpicGames_InstalledGame : IInstalledGame
+    {
+        public string Name { get; set; }
+        public string LaunchString { get; set; }
+        public Launchers Launcher { get; set; }
+
+        public EpicGames_InstalledGame(string name, string launchString)
+        {
+            Name = name;
+            LaunchString = launchString;
+            Launcher = Launchers.EpicGames;
+        }
+
+        public void LaunchGame()
+        {
+            try
+            {
+                Process.Start(LaunchString);
+            }
+            catch
+            {
+                MessageBox.Show("Клиент Epic Games не установлен!");
+            }
+        }
+    }
+
 }

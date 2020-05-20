@@ -112,23 +112,32 @@ namespace GameAggregator.EGames
         {
             var games = new List<IEGameStore>();
 
-            MemoryCache memCache = MemoryCache.Default;
-            if (!memCache.Contains(productMappingCacheKey))
-            {
-                string productMappingResponce = egProductMappingClient.DownloadString("");
-                var jMapProd = JObject.Parse(productMappingResponce);
-                memCache.Set(productMappingCacheKey, jMapProd, DateTimeOffset.Now.AddDays(7.0));
-            }
-            var jMap = (memCache.Get(productMappingCacheKey) as JObject).Properties();
-
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
             string variablesQuery = string.Format(storeQueryVariables, count, keyword, sortByStr, sortDirStr, startIndex);
             string query = string.Format(storeQuery, variablesQuery);
+            string response;
+            IEnumerable<JProperty> jMap;
 
-            string responce = egBackendClient.UploadString("", query);
+            try
+            {
+                MemoryCache memCache = MemoryCache.Default;
+                if (!memCache.Contains(productMappingCacheKey))
+                {
+                    string productMappingResponce = egProductMappingClient.DownloadString("");
+                    var jMapProd = JObject.Parse(productMappingResponce);
+                    memCache.Set(productMappingCacheKey, jMapProd, DateTimeOffset.Now.AddDays(7.0));
+                }
+                jMap = (memCache.Get(productMappingCacheKey) as JObject).Properties();
 
-            var jObj = JObject.Parse(responce);
+                response = egBackendClient.UploadString("", query);
+            }
+            catch
+            {
+                throw new Exception("Сервер Epic Games недоступен");
+            }
+
+            var jObj = JObject.Parse(response);
             var elements = jObj["data"]["Catalog"]["searchStore"]["elements"];
 
             if (elements.Count() == 0)
@@ -136,45 +145,52 @@ namespace GameAggregator.EGames
 
             foreach (var elem in elements.Children())
             {
-                var name = elem["title"].ToString();
-                var id = elem["id"].ToString();
-
-                var gameNamespace = elem["namespace"].ToString();
-                var urlName = jMap.First(x => x.Name == gameNamespace).Value.ToString();
-
-                var imgWide = elem["keyImages"]
-                    .First(x => x["type"].ToString() == "OfferImageWide")
-                    ["url"].ToString();
-
-                var imgTall = elem["keyImages"]
-                        .FirstOrDefault(x => x["type"].ToString() == "OfferImageTall")?
-                        ["url"].ToString();
-                imgTall = imgTall ?? elem["keyImages"]
-                        .FirstOrDefault(x => x["type"].ToString() == "DieselGameBoxLogo")?
-                        ["url"].ToString();
-
-                var jPrice = elem["price"]["totalPrice"];
-                int dec = jPrice["currencyInfo"]["decimals"].Value<int>();
-                double price = jPrice["originalPrice"].Value<int>() / Math.Pow(10, dec);
-                double discountPrice = jPrice["discountPrice"].Value<int>() / Math.Pow(10, dec);
-                string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
-                string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
-
-                var game = new EGame()
+                try
                 {
-                    Name = name,
-                    Id = id,
-                    Namespace = gameNamespace,
-                    UrlName = urlName,
-                    ImageUrlWide = imgWide,
-                    ImageUrlTall = imgTall,
-                    Price = price,
-                    PriceWithDiscount = discountPrice,
-                    PriceStr = priceStr,
-                    PriceWithDiscountStr = discountPriceStr
-                };
+                    var name = elem["title"].ToString();
+                    var id = elem["id"].ToString();
 
-                games.Add(game);
+                    var gameNamespace = elem["namespace"].ToString();
+                    var urlName = jMap.First(x => x.Name == gameNamespace).Value.ToString();
+
+                    var imgWide = elem["keyImages"]
+                        .First(x => x["type"].ToString() == "OfferImageWide")
+                        ["url"].ToString();
+
+                    var imgTall = elem["keyImages"]
+                            .FirstOrDefault(x => x["type"].ToString() == "OfferImageTall")?
+                            ["url"].ToString();
+                    imgTall = imgTall ?? elem["keyImages"]
+                            .FirstOrDefault(x => x["type"].ToString() == "DieselGameBoxLogo")?
+                            ["url"].ToString();
+
+                    var jPrice = elem["price"]["totalPrice"];
+                    int dec = jPrice["currencyInfo"]["decimals"].Value<int>();
+                    double price = jPrice["originalPrice"].Value<int>() / Math.Pow(10, dec);
+                    double discountPrice = jPrice["discountPrice"].Value<int>() / Math.Pow(10, dec);
+                    string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
+                    string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
+
+                    var game = new EGame()
+                    {
+                        Name = name,
+                        Id = id,
+                        Namespace = gameNamespace,
+                        UrlName = urlName,
+                        ImageUrlWide = imgWide,
+                        ImageUrlTall = imgTall,
+                        Price = price,
+                        PriceWithDiscount = discountPrice,
+                        PriceStr = priceStr,
+                        PriceWithDiscountStr = discountPriceStr
+                    };
+
+                    games.Add(game);
+                }
+                catch
+                {
+                    continue;
+                }
             }
 
             return games;
@@ -190,31 +206,45 @@ namespace GameAggregator.EGames
         {
             var gameInfo = game as IEGameStoreFull;
 
-            string responce = egGetGameClient.DownloadString(game.UrlName);
-            var jObj = JObject.Parse(responce);
-            var data = jObj["pages"].FirstOrDefault()?["data"];
+            string response;
 
-            var pNames = (data["meta"]?["publisher"] as JArray)?.FirstOrDefault() ?? data["about"]?["publisherAttribution"];
-            var dNames = (data["meta"]?["developer"] as JArray)?.FirstOrDefault() ?? data["about"]?["developerAttribution"];
-            gameInfo.PublisherName = pNames?.ToString() ?? "–";
-            gameInfo.DeveloperName = dNames?.ToString() ?? "–";
+            try
+            {
+                response = egGetGameClient.DownloadString(game.UrlName);
+            }
+            catch
+            {
+                throw new Exception("Сервер Epic Games недоступен");
+            }
 
-            gameInfo.Date = data["meta"]?["releaseDate"]?.ToObject<DateTime>();
-            gameInfo.DateStr = gameInfo.Date?.ToShortDateString() ?? "–";
-            if (gameInfo.Date == null && data["meta"]?["customReleaseDate"] != null)
-                gameInfo.DateStr = data["meta"]["customReleaseDate"].ToString();
+            try
+            {
+                var jObj = JObject.Parse(response);
+                var data = jObj["pages"].FirstOrDefault()?["data"];
 
-            gameInfo.Languages = "–";
-            var languagesList = data["requirements"]?["languages"]?.Select(x => x.ToString());
-            if (languagesList != null && languagesList.Count() != 0)
-                gameInfo.Languages = string.Join("\n", languagesList);
+                var pNames = (data["meta"]?["publisher"] as JArray)?.FirstOrDefault() ?? data["about"]?["publisherAttribution"];
+                var dNames = (data["meta"]?["developer"] as JArray)?.FirstOrDefault() ?? data["about"]?["developerAttribution"];
+                gameInfo.PublisherName = pNames?.ToString() ?? "–";
+                gameInfo.DeveloperName = dNames?.ToString() ?? "–";
 
-            var requirementsList = data["requirements"]?["systems"]?.Select(x => x.FirstOrDefault(y => (y as JProperty).Name == "systemType"));
-            var platformsList = requirementsList?.Select(x => (x as JProperty).Value) ??
-                (data["meta"]?["platform"] as JArray);
-            gameInfo.Platforms = platformsList?.Select(x => x.ToString()).ToList() ?? new List<string>();
+                gameInfo.Date = data["meta"]?["releaseDate"]?.ToObject<DateTime>();
+                gameInfo.DateStr = gameInfo.Date?.ToShortDateString() ?? "–";
+                if (gameInfo.Date == null && data["meta"]?["customReleaseDate"] != null)
+                    gameInfo.DateStr = data["meta"]["customReleaseDate"].ToString();
 
-            gameInfo.Description = data["about"]?["description"]?.ToString() ?? "–";
+                gameInfo.Languages = "–";
+                var languagesList = data["requirements"]?["languages"]?.Select(x => x.ToString());
+                if (languagesList != null && languagesList.Count() != 0)
+                    gameInfo.Languages = string.Join("\n", languagesList);
+
+                var requirementsList = data["requirements"]?["systems"]?.Select(x => x.FirstOrDefault(y => (y as JProperty).Name == "systemType"));
+                var platformsList = requirementsList?.Select(x => (x as JProperty).Value) ??
+                    (data["meta"]?["platform"] as JArray);
+                gameInfo.Platforms = platformsList?.Select(x => x.ToString()).ToList() ?? new List<string>();
+
+                gameInfo.Description = data["about"]?["description"]?.ToString() ?? "–";
+            }
+            catch { }
 
             return gameInfo;
         }
@@ -227,10 +257,19 @@ namespace GameAggregator.EGames
         /// <returns>Изображение в виде System.Drawing.Image объекта</returns>
         public Image GetGameImage(EGame game, bool isWide = false)
         {
-            var client = new WebClient();
-            var responce = client.DownloadData(isWide ? game.ImageUrlWide : game.ImageUrlTall);
+            byte[] response;
+
+            try
+            {
+                var client = new WebClient();
+                response = client.DownloadData(isWide ? game.ImageUrlWide : game.ImageUrlTall);
+            }
+            catch
+            {
+                throw new Exception("Сервер Epic Games недоступен");
+            }
             Image img;
-            using (var stream = new MemoryStream(responce))
+            using (var stream = new MemoryStream(response))
                 img = Image.FromStream(stream);
             return img;
         }
@@ -278,9 +317,9 @@ namespace GameAggregator.EGames
 
                 return games;
             }
-            catch (Exception ex)
+            catch
             {
-                return null;
+                throw new Exception("Клиент Epic Games возможно не установлен на ваш компьютер.");
             }
         }
 

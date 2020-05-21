@@ -64,25 +64,41 @@ namespace GameAggregator.SteamStore
             List<SteamGame> steamGames = apps.FindAll(x => x.Name.ToLower().Contains(name.ToLower()));
             if (steamGames == null) return null;
 
+            string appids = steamGames[0].Appid;
+            for (int i = 1; i < steamGames.Count; i++)
+                appids += "," + steamGames[i].Appid;
+
             List<IStoreGame> storeGames = new List<IStoreGame>();
-            foreach (SteamGame game in steamGames)
+            try
             {
-                try
+                string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appids +
+                    "&filters=price_overview");
+                JObject jsonObj = JObject.Parse(responce);
+
+                foreach (SteamGame game in steamGames)
                 {
-                    string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + game.Appid);
-                    JObject jsonObj = JObject.Parse(responce);
                     if (jsonObj[game.Appid]["success"].ToString() == "false") continue;
 
-                    Steam_StoreGame steam_StoreGame = new Steam_StoreGame(game.Name,
-                        double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
-                        "https://store.steampowered.com/app/" + game.Appid);
+                    Steam_StoreGame steam_StoreGame;
+                    try
+                    {
+                        steam_StoreGame = new Steam_StoreGame(game.Name,
+                            double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
+                            "https://store.steampowered.com/app/" + game.Appid);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
                     storeGames.Add(steam_StoreGame);
                 }
-                catch
-                {
-                    throw new Exception("Сервера Steam недоступны");
-                }
             }
+            catch (WebException)
+            {
+                throw new Exception("Сервера Steam недоступны");
+            }
+            catch { }
 
             return storeGames;
         }

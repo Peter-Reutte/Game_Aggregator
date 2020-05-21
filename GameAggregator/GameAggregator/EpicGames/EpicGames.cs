@@ -149,6 +149,9 @@ namespace GameAggregator.EGames
             {
                 try
                 {
+                    if (elem["effectiveDate"].Value<DateTime>().Year == 2099)
+                        continue; //Игры еще нет в продаже
+
                     var name = elem["title"].ToString();
                     var id = elem["id"].ToString();
 

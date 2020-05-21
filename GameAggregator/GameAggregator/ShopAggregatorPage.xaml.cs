@@ -14,6 +14,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GameAggregator.Controls;
+using GameAggregator.EGames;
+using GameAggregator.SteamStore;
+using GameAggregator.OriginStore;
+using System.ComponentModel;
 
 namespace GameAggregator
 {
@@ -22,25 +26,56 @@ namespace GameAggregator
     /// </summary>
     public partial class ShopAggregatorPage : Page
     {
+        private BackgroundWorker bwSearcher;
         public ShopAggregatorPage()
         {
             InitializeComponent();
-            var games = GetGames("");
-            foreach(var game in games)
+
+            bwSearcher = new BackgroundWorker();
+            bwSearcher.DoWork += (o, args) =>
             {
-                spStoreGamesList.Children.Add(new StoreGameControl(game));
-            }
+                string keyword = args.Argument as string;
+                var games = GetGames(keyword);
+                args.Result = games;
+            };
+            bwSearcher.RunWorkerCompleted += (o, args) =>
+            {
+                List<IStoreGame> games = args.Result as List<IStoreGame>;
+                lvStoreGames.ItemsSource = games.Select(x => new StoreGameControl(x));
+                this.IsEnabled = true;
+            };
         }
 
         public List<IStoreGame> GetGames(string keyword)
         {
             List<IStoreGame> games = new List<IStoreGame>();
 
-            EGames.EpicGames eg = new EGames.EpicGames();
+            EpicGames epicGames = new EpicGames();
+            Steam steam = new Steam();
+            Origin origin = new Origin();
 
-            games.AddRange(eg.GetStoreGames(keyword: keyword));
-
+            try
+            {
+                games.AddRange(epicGames.GetStoreGames(keyword: keyword));
+            }
+            catch { }
+            try
+            {
+                games.AddRange(origin.GetGamePrice(keyword));
+            }
+            catch { }
+            try
+            {
+                games.AddRange(steam.GetGamePrice(keyword));
+            }
+            catch { }
             return games;
+        }
+
+        private void BtnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            this.IsEnabled = false;
+            bwSearcher.RunWorkerAsync(tbSearchString.Text);
         }
     }
 }

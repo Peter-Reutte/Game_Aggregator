@@ -81,6 +81,7 @@
     <Compile Include="LibraryPage.xaml.cs">
       <DependentUpon>LibraryPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\LibraryGameModel.cs" />
     <Compile Include="Models\StoreGameModel.cs" />
     <Compile Include="Origin\Origin.cs" />
     <Compile Include="ShopAggregatorPage.xaml.cs">

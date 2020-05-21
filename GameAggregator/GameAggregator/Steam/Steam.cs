@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Runtime.Caching;
@@ -56,6 +55,8 @@ namespace GameAggregator.SteamStore
         /// <returns>Результат поиска; null, если не найдено</returns>
         public List<IStoreGame> GetGamePrice(string name)
         {
+            if (name.Trim() == "") return null;
+
             MemoryCache memCache = MemoryCache.Default;
             if (!memCache.Contains("steamapps")) RefreshAppIDs();
             List<SteamGame> apps = memCache.Get("steamapps") as List<SteamGame>;
@@ -70,6 +71,8 @@ namespace GameAggregator.SteamStore
                 {
                     string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + game.Appid);
                     JObject jsonObj = JObject.Parse(responce);
+                    if (jsonObj[game.Appid]["success"].ToString() == "false") continue;
+
                     Steam_StoreGame steam_StoreGame = new Steam_StoreGame(game.Name,
                         double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
                         "https://store.steampowered.com/app/" + game.Appid);
@@ -89,7 +92,7 @@ namespace GameAggregator.SteamStore
         /// </summary>
         /// <param name="playerProfileLink">Ссылка на профиль Steam</param>
         /// <returns>Список игр из Steam</returns>
-        public Steam_OwnedGameList GetOwnedGamesList(string playerProfileLink)
+        public List<ILibraryGame> GetOwnedGamesList(string playerProfileLink)
         {
             string id = GetUserId(playerProfileLink);
 
@@ -104,7 +107,14 @@ namespace GameAggregator.SteamStore
                 throw new Exception("Ошибка доступа. Возможно, Ваш профиль скрыт, либо сервера недоступны.");
             }
 
-            return JsonConvert.DeserializeObject<Steam_OwnedGameList>(responce);
+            Steam_OwnedGameList list = JsonConvert.DeserializeObject<Steam_OwnedGameList>(responce);
+            List<ILibraryGame> library = new List<ILibraryGame>();
+            foreach (OwnedGame game in list.Response.Games)
+            {
+                library.Add(new Steam_LibraryGame(game.Name));
+            }
+
+            return library;
         }
 
         /// <summary>

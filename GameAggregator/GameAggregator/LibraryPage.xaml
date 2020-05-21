@@ -11,7 +11,7 @@
     <Grid Background="{x:Null}">
         <TextBox Margin="0, 4, 0, 4" x:Name="tbxSearchGame" Text="" VerticalAlignment="Top"/>
         <ScrollViewer Margin="0, 24, 0, 0" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="spInstalledGames"/>
+            <StackPanel x:Name="spGames"/>
         </ScrollViewer>
     </Grid>
 </Page>

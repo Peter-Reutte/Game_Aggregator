@@ -1,19 +1,9 @@
 ﻿using GameAggregator.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GameAggregator.Controls
 {
@@ -24,26 +14,52 @@ namespace GameAggregator.Controls
     {
         private readonly IInstalledGame InstalledGame;
 
+        /// <summary>
+        /// Элемент интерфейса для установленной игры
+        /// </summary>
+        /// <param name="installedGame">Установленная игра</param>
         public LibraryItem(IInstalledGame installedGame)
         {
             InitializeComponent();
             InstalledGame = installedGame;
             lbName.Content = installedGame.Name;
-            System.Drawing.Image launcherIcon = null;
-            if (installedGame.Launcher == Launchers.EpicGames)
-                launcherIcon = Properties.Resources.EpicGamesIcon;
-            else if (installedGame.Launcher == Launchers.Origin)
-                launcherIcon = Properties.Resources.OriginIcon;
-            else if (installedGame.Launcher == Launchers.Steam)
-                launcherIcon = Properties.Resources.SteamIcon;
-            else if (installedGame.Launcher == Launchers.Uplay)
-                launcherIcon = Properties.Resources.UplayIcon;
-            else launcherIcon = Properties.Resources.Other;
-
-            imgLauncher.Source = GetImageStream(launcherIcon);
+            imgLauncher.Source = GetImageStream(GetLauncherImage(installedGame.Launcher));
         }
 
+        /// <summary>
+        /// Элемент интерфейса для игры из библиотеки
+        /// </summary>
+        /// <param name="libraryGame">Игра из библиотеки</param>
+        public LibraryItem(ILibraryGame libraryGame)
+        {
+            InitializeComponent();
+            lbName.Content = libraryGame.Name;
+            imgLauncher.Source = GetImageStream(GetLauncherImage(libraryGame.Launcher));
+            btnPlay.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Обработка команды запуска установленной игры
+        /// </summary>
         private void BtnPlay_Click(object sender, RoutedEventArgs e) => InstalledGame.LaunchGame();
+
+        /// <summary>
+        /// Получение логотипа лаунчера
+        /// </summary>
+        /// <param name="launcher">Лаунчер</param>
+        /// <returns>Логотип лаунчера</returns>
+        private System.Drawing.Image GetLauncherImage(Launchers launcher)
+        {
+            if (launcher == Launchers.EpicGames)
+                return Properties.Resources.EpicGamesIcon;
+            else if (launcher == Launchers.Origin)
+                return Properties.Resources.OriginIcon;
+            else if (launcher == Launchers.Steam)
+                return Properties.Resources.SteamIcon;
+            else if (launcher == Launchers.Uplay)
+                return Properties.Resources.UplayIcon;
+            else return Properties.Resources.Other;
+        }
 
         [DllImport("gdi32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]

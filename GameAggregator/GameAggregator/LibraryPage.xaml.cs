@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.Generic;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using GameAggregator.Controls;
 using GameAggregator.EGames;
 using GameAggregator.Models;
@@ -26,17 +14,26 @@ namespace GameAggregator
     /// </summary>
     public partial class LibraryPage : Page
     {
-        public LibraryPage()
+        public LibraryPage(string steam_acc)
         {
             InitializeComponent();
-            List<IInstalledGame> games = GetAllGames();
-            foreach(IInstalledGame game in games)
+            List<IInstalledGame> games = GetInstalledGames();
+            foreach (IInstalledGame game in games)
             {
-                spInstalledGames.Children.Add(new LibraryItem(game));
+                spGames.Children.Add(new LibraryItem(game));
+            }
+
+            List<ILibraryGame> library = GetLibraryGames(steam_acc);
+            foreach (ILibraryGame game in library)
+            {
+                if (games.Find(x => x.Name == game.Name) == null)
+                {
+                    spGames.Children.Add(new LibraryItem(game));
+                }
             }
         }
 
-        public List<IInstalledGame> GetAllGames()
+        public List<IInstalledGame> GetInstalledGames()
         {
             List<IInstalledGame> installedGames = new List<IInstalledGame>();
             try
@@ -63,11 +60,24 @@ namespace GameAggregator
             installedGames.Sort((g1, g2) => g1.Name.CompareTo(g2.Name));
             return installedGames;
         }
-    }
 
-    public class Game
-    {
-        public string Name { get; set; }
-        public Image IconClient { get; set; }
+        /// <summary>
+        /// Получение игр из библиотек аккаунтов
+        /// </summary>
+        /// <param name="steam_acc">Ссылка на аккаунт Steam (временно)</param>
+        /// <returns>Список игр в библиотеках</returns>
+        public List<ILibraryGame> GetLibraryGames(string steam_acc)
+        {
+            List<ILibraryGame> libraryGames = new List<ILibraryGame>();
+            try
+            {
+                Steam steam = new Steam();
+                libraryGames.AddRange(steam.GetOwnedGamesList(steam_acc));
+            }
+            catch { }
+
+            libraryGames.Sort((g1, g2) => g1.Name.CompareTo(g2.Name));
+            return libraryGames;
+        }
     }
 }

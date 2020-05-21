@@ -31,7 +31,7 @@ namespace GameAggregator
 
         private void BtnLibrary_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Content = new LibraryPage();
+            MainFrame.Content = new LibraryPage("https://steamcommunity.com/profiles/76561198254132723");
         }
 
         private void BtnShop_Click(object sender, RoutedEventArgs e)

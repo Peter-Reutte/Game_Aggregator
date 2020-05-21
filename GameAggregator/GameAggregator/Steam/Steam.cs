@@ -55,8 +55,6 @@ namespace GameAggregator.SteamStore
         /// <returns>Результат поиска; null, если не найдено</returns>
         public List<IStoreGame> GetGamePrice(string name)
         {
-            if (name.Trim() == "") return null;
-
             MemoryCache memCache = MemoryCache.Default;
             if (!memCache.Contains("steamapps")) RefreshAppIDs();
             List<SteamGame> apps = memCache.Get("steamapps") as List<SteamGame>;
@@ -71,21 +69,26 @@ namespace GameAggregator.SteamStore
                 {
                     string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + game.Appid);
                     JObject jsonObj = JObject.Parse(responce);
-                    if (jsonObj[game.Appid]["success"].ToString() == "false") continue;
-
+                    if (jsonObj[game.Appid]["success"].ToString() == "False")
+                        continue;
                     Steam_StoreGame steam_StoreGame = new Steam_StoreGame(game.Name,
                         double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
                         "https://store.steampowered.com/app/" + game.Appid);
                     storeGames.Add(steam_StoreGame);
                 }
+                catch (WebException ex)
+                {
+                    return storeGames;
+                }
                 catch
                 {
-                    throw new Exception("Сервера Steam недоступны");
+                    continue;
                 }
             }
 
             return storeGames;
         }
+
 
         /// <summary>
         /// Получает список игр из Steam-библиотеки пользозвателя

@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using GameAggregator.Models;
+using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace GameAggregator.OriginStore
         /// </summary>
         /// <param name="name">Название для поиска</param>
         /// <returns>Список найденных вариантов (включая базовые игры, DLC и проч.)</returns>
-        public List<OriginGame> GetGamePrice(string name)
+        public List<IStoreGame> GetGamePrice(string name)
         {
             JObject jData;
             string responce;
@@ -47,7 +48,7 @@ namespace GameAggregator.OriginStore
             }
 
             JObject jsonObj = JObject.Parse(responce);
-            List<OriginGame> links = new List<OriginGame>();
+            List<IStoreGame> games = new List<IStoreGame>();
             if (jsonObj["games"]["game"] != null)
             {
                 foreach (JToken token in jsonObj["games"]["game"].Children())
@@ -69,11 +70,12 @@ namespace GameAggregator.OriginStore
                     //Если не удалось извлечь цену, на всякий случай указывается -1, хотя у всех текущих позиций цена есть
                     double price = withPrice.Count() == 0 ? -1 : withPrice.Select(x => x["countries"]["catalogPrice"].Value<double>()).Min();
 
-                    links.Add(new OriginGame(token["gameName"].ToString(), token["path"].ToString(), price));
+                    games.Add(new Origin_StoreGame(token["gameName"].ToString(), price, 
+                        "https://www.origin.com/rus/en-us/store" + token["path"].ToString()));
                 }
             }
 
-            return links;
+            return games;
         }
 
         #region Installed games

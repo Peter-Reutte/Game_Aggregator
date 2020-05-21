@@ -83,7 +83,6 @@
     </Compile>
     <Compile Include="Models\StoreGameModel.cs" />
     <Compile Include="Origin\Origin.cs" />
-    <Compile Include="Origin\Models\OriginGame.cs" />
     <Compile Include="ShopAggregatorPage.xaml.cs">
       <DependentUpon>ShopAggregatorPage.xaml</DependentUpon>
     </Compile>

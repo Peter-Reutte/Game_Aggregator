@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using GameAggregator.Models;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -49,26 +50,28 @@ namespace GameAggregator.SteamStore
         }
 
         /// <summary>
-        /// Получение форматированной строки с ценой игры в Steam
+        /// Получение информации об игре из магазина Steam
         /// </summary>
         /// <param name="name">Название игры</param>
-        /// <returns>Форматированная строка с ценой</returns>
-        public string GetGamePrice(string name)
+        /// <returns>Результат поиска; null, если не найдено</returns>
+        public List<IStoreGame> GetGamePrice(string name)
         {
             MemoryCache memCache = MemoryCache.Default;
             if (!memCache.Contains("steamapps")) RefreshAppIDs();
             List<SteamGame> apps = memCache.Get("steamapps") as List<SteamGame>;
 
             SteamGame steamGame = apps.Find(x => x.Name == name);
-            if (steamGame == null) return "не найдено";
-
-            string appid = apps.Find(x => x.Name == name).Appid.ToString();
+            if (steamGame == null) return null;
+            string appid = steamGame.Appid;
 
             try
             {
                 string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appid);
                 JObject jsonObj = JObject.Parse(responce);
-                return jsonObj[appid]["data"]["price_overview"]["final_formatted"].ToString();
+                Steam_StoreGame steam_StoreGame = new Steam_StoreGame(name,
+                    double.Parse(jsonObj[appid]["data"]["price_overview"]["final"].ToString()) / 100,
+                    "https://store.steampowered.com/app/" + appid);
+                return new List<IStoreGame>() { steam_StoreGame };
             }
             catch
             {

@@ -50,7 +50,7 @@ namespace GameAggregator.SteamStore
         }
 
         /// <summary>
-        /// Получение информации об игре из магазина Steam
+        /// Поиск игр в магазине Steam
         /// </summary>
         /// <param name="name">Название игры</param>
         /// <returns>Результат поиска; null, если не найдено</returns>
@@ -60,23 +60,28 @@ namespace GameAggregator.SteamStore
             if (!memCache.Contains("steamapps")) RefreshAppIDs();
             List<SteamGame> apps = memCache.Get("steamapps") as List<SteamGame>;
 
-            SteamGame steamGame = apps.Find(x => x.Name == name);
-            if (steamGame == null) return null;
-            string appid = steamGame.Appid;
+            List<SteamGame> steamGames = apps.FindAll(x => x.Name.ToLower().Contains(name.ToLower()));
+            if (steamGames == null) return null;
 
-            try
+            List<IStoreGame> storeGames = new List<IStoreGame>();
+            foreach (SteamGame game in steamGames)
             {
-                string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appid);
-                JObject jsonObj = JObject.Parse(responce);
-                Steam_StoreGame steam_StoreGame = new Steam_StoreGame(name,
-                    double.Parse(jsonObj[appid]["data"]["price_overview"]["final"].ToString()) / 100,
-                    "https://store.steampowered.com/app/" + appid);
-                return new List<IStoreGame>() { steam_StoreGame };
+                try
+                {
+                    string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + game.Appid);
+                    JObject jsonObj = JObject.Parse(responce);
+                    Steam_StoreGame steam_StoreGame = new Steam_StoreGame(game.Name,
+                        double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
+                        "https://store.steampowered.com/app/" + game.Appid);
+                    storeGames.Add(steam_StoreGame);
+                }
+                catch
+                {
+                    throw new Exception("Сервера Steam недоступны");
+                }
             }
-            catch
-            {
-                throw new Exception("Сервера Steam недоступны");
-            }
+
+            return storeGames;
         }
 
         /// <summary>

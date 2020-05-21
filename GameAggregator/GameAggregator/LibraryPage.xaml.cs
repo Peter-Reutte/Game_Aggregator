@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GameAggregator.Controls;
 using GameAggregator.EGames;
+using GameAggregator.Models;
 using GameAggregator.OriginStore;
 using GameAggregator.SteamStore;
 using GameAggregator.UplayStore;

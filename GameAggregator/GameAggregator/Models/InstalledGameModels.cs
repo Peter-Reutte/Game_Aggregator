@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Windows;
 
-namespace GameAggregator
+namespace GameAggregator.Models
 {
     public enum Launchers
     {

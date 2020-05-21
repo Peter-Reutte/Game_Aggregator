@@ -10,6 +10,7 @@ using System.Net;
 using System.Runtime.Caching;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace GameAggregator.SteamStore
 {
@@ -23,9 +24,9 @@ namespace GameAggregator.SteamStore
             SteamWebClient = new WebClient() { Encoding = Encoding.UTF8 };
 
             //временно -- Steam Web API key
-            //StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
-            //Key = sr.ReadLine();
-            //sr.Close();
+            StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
+            Key = sr.ReadLine();
+            sr.Close();
         }
 
         /// <summary>
@@ -85,10 +86,6 @@ namespace GameAggregator.SteamStore
                             double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
                             "https://store.steampowered.com/app/" + game.Appid);
                     }
-                    catch (WebException ex)
-                    {
-                        return storeGames;
-                    }
                     catch
                     {
                         continue;
@@ -106,7 +103,7 @@ namespace GameAggregator.SteamStore
 
 
         /// <summary>
-        /// Получает список игр из Steam-библиотеки пользозвателя
+        /// Получает список игр из Steam-библиотеки пользователя
         /// </summary>
         /// <param name="playerProfileLink">Ссылка на профиль Steam</param>
         /// <returns>Список игр из Steam</returns>
@@ -122,7 +119,7 @@ namespace GameAggregator.SteamStore
             }
             catch
             {
-                throw new Exception("Ошибка доступа. Возможно, Ваш профиль скрыт, либо сервера недоступны.");
+                throw new Exception("Сервера Steam недоступны");
             }
 
             Steam_OwnedGameList list = JsonConvert.DeserializeObject<Steam_OwnedGameList>(responce);
@@ -136,7 +133,43 @@ namespace GameAggregator.SteamStore
         }
 
         /// <summary>
-        /// Получает SteamID пользозвателя из ссылки на профиль
+        /// Получает информацию о пользователе
+        /// </summary>
+        /// <param name="playerProfileLink">Ссылка на профиль Steam</param>
+        /// <returns>Имя пользователя; null если не найден</returns>
+        public string GetUserInfo(string playerProfileLink)
+        {
+            string id = GetUserId(playerProfileLink);
+
+            string responce;
+            try
+            {
+                responce = SteamWebClient.DownloadString("http://api.steampowered.com/ISteamUser/GetPlayerSummaries/" +
+                    "v0002/?key=" + Key + "&steamids=" + id + "&format=json");
+            }
+            catch
+            {
+                throw new Exception("Сервера Steam недоступны");
+            }
+
+            JObject jsonObj = JObject.Parse(responce);
+            try
+            {
+                int privacyLevel = int.Parse(jsonObj["response"]["players"][0]["communityvisibilitystate"].ToString());
+                if (privacyLevel < 3)
+                {
+                    MessageBox.Show("Профиль Steam скрыт. Просмотр библиотеки недоступен.");
+                }
+                return jsonObj["response"]["players"][0]["personaname"].ToString();
+            }
+            catch
+            {
+                throw new Exception("Данный профиль не существует");
+            }
+        }
+
+        /// <summary>
+        /// Получает SteamID пользователя из ссылки на профиль
         /// </summary>
         /// <param name="playerProfileLink">Ссылка на профиль Steam</param>
         /// <returns>ID пользователя Steam (17 цифр)</returns>

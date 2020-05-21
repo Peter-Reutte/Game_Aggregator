@@ -1,7 +1,11 @@
-﻿using System;
+﻿using GameAggregator.Models;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,7 +35,7 @@ namespace GameAggregator
 
         private void BtnLibrary_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Content = new LibraryPage("https://steamcommunity.com/profiles/76561198254132723");
+            MainFrame.Content = new LibraryPage(GetAccounts());
         }
 
         private void BtnShop_Click(object sender, RoutedEventArgs e)
@@ -41,7 +45,35 @@ namespace GameAggregator
 
         private void BtnManageAccounts_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Content = new AccountsPage();
+            MainFrame.Content = new AccountsPage(GetAccounts());
+        }
+
+        public Accounts GetAccounts()
+        {
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            StreamReader sr;
+            try
+            {
+                sr = new StreamReader(System.IO.Path.Combine(appDataPath, "steam.txt"));
+                string steamProfileLink = sr.ReadLine();
+                sr.Close();
+                if (Regex.Match(steamProfileLink, "https://steamcommunity.com/").Success)
+                {
+                    Accounts accounts = new Accounts
+                    {
+                        SteamProfileLink = steamProfileLink
+                    };
+                    return accounts;
+                }
+                else return new Accounts();
+            }
+            catch
+            {
+                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath, "steam.txt"), false);
+                sw.WriteLine();
+                sw.Close();
+                return new Accounts();
+            }
         }
     }
 }

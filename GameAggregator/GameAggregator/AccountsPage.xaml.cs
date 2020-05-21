@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GameAggregator.Controls;
+using GameAggregator.Models;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GameAggregator
 {
@@ -20,9 +10,25 @@ namespace GameAggregator
     /// </summary>
     public partial class AccountsPage : Page
     {
-        public AccountsPage()
+        public AccountsPage(Accounts accounts)
         {
             InitializeComponent();
+            //Скрываем кнопку "+ аккаунт", если аккаунт этой площадки привязан
+            if (accounts.SteamProfileLink == null)
+            {
+                btnSteamAccount.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                btnSteamAccount.Visibility = Visibility.Hidden;
+                spAccounts.Children.Add(new AccountControl(Launchers.Steam, accounts.SteamProfileLink));
+            }
+        }
+
+        private void BtnSteamAccount_Click(object sender, RoutedEventArgs e)
+        {
+            spAccounts.Children.Add(new AccountControl(Launchers.Steam));
+            btnSteamAccount.Visibility = Visibility.Hidden;
         }
     }
 }

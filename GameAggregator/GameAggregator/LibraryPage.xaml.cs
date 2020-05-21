@@ -14,7 +14,11 @@ namespace GameAggregator
     /// </summary>
     public partial class LibraryPage : Page
     {
-        public LibraryPage(string steam_acc)
+        /// <summary>
+        /// Страница "Библиотека"
+        /// </summary>
+        /// <param name="accounts">Привязанные аккаунты</param>
+        public LibraryPage(Accounts accounts)
         {
             InitializeComponent();
             List<IInstalledGame> games = GetInstalledGames();
@@ -23,7 +27,7 @@ namespace GameAggregator
                 spGames.Children.Add(new LibraryItem(game));
             }
 
-            List<ILibraryGame> library = GetLibraryGames(steam_acc);
+            List<ILibraryGame> library = GetLibraryGames(accounts);
             foreach (ILibraryGame game in library)
             {
                 if (games.Find(x => x.Name == game.Name) == null)
@@ -33,6 +37,10 @@ namespace GameAggregator
             }
         }
 
+        /// <summary>
+        /// Получение списка установленных на компьютере игр
+        /// </summary>
+        /// <returns>Список установленных игр</returns>
         public List<IInstalledGame> GetInstalledGames()
         {
             List<IInstalledGame> installedGames = new List<IInstalledGame>();
@@ -64,15 +72,18 @@ namespace GameAggregator
         /// <summary>
         /// Получение игр из библиотек аккаунтов
         /// </summary>
-        /// <param name="steam_acc">Ссылка на аккаунт Steam (временно)</param>
+        /// <param name="accounts">Привязанные аккаунты</param>
         /// <returns>Список игр в библиотеках</returns>
-        public List<ILibraryGame> GetLibraryGames(string steam_acc)
+        public List<ILibraryGame> GetLibraryGames(Accounts accounts)
         {
             List<ILibraryGame> libraryGames = new List<ILibraryGame>();
             try
             {
-                Steam steam = new Steam();
-                libraryGames.AddRange(steam.GetOwnedGamesList(steam_acc));
+                if (accounts.SteamProfileLink != null)
+                {
+                    Steam steam = new Steam();
+                    libraryGames.AddRange(steam.GetOwnedGamesList(accounts.SteamProfileLink));
+                }
             }
             catch { }
 

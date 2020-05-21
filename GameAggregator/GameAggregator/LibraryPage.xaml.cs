@@ -27,6 +27,32 @@ namespace GameAggregator
         public LibraryPage()
         {
             InitializeComponent();
+            //  Как добавить иконку лаунчера
+            //List<IInstalledGame> games = GetAllGames();
+            //foreach (IInstalledGame game in games)
+            //{
+            //    System.Drawing.Image launcherIcon;
+            //    if (game.Launcher == Launchers.EpicGames)
+            //    {
+            //        launcherIcon = Properties.Resources.EpicGamesIcon;
+            //    }
+            //    else if (game.Launcher == Launchers.Origin)
+            //    {
+            //        launcherIcon = Properties.Resources.OriginIcon;
+            //    }
+            //    else if (game.Launcher == Launchers.Other)
+            //    {
+            //        launcherIcon = Properties.Resources.Other;
+            //    }
+            //    else if (game.Launcher == Launchers.Steam)
+            //    {
+            //        launcherIcon = Properties.Resources.SteamIcon;
+            //    }
+            //    else if (game.Launcher == Launchers.Uplay)
+            //    {
+            //        launcherIcon = Properties.Resources.UplayIcon;
+            //    }
+            //}
         }
 
         public List<IInstalledGame> GetAllGames()

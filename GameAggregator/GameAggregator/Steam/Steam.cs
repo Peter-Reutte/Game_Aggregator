@@ -26,13 +26,6 @@ namespace GameAggregator.SteamStore
             //StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
             //Key = sr.ReadLine();
             //sr.Close();
-
-
-            //для теста; нужно будет убрать в хорошее место
-            //string price = GetGamePrice("Borderlands 3");
-            //Steam_OwnedGameList list = GetOwnedGamesList("https://steamcommunity.com/profiles/76561198254132723"); //Dingo's profile (temp)
-            //Image image = GetGameIcon(list.Response.Games[0]);
-            //image.Save("test.jpg", ImageFormat.Jpeg);
         }
 
         /// <summary>
@@ -200,7 +193,7 @@ namespace GameAggregator.SteamStore
                                     }
                                 }
                             }
-                            steamGameDirs.Add(steam64path + "steamapps\\");
+                            steamGameDirs.Add(steam64path + "\\steamapps\\");
                         }
                     }
                 }
@@ -240,6 +233,7 @@ namespace GameAggregator.SteamStore
                     steam_InstalledGames.Add(new Steam_InstalledGame(name, "steam://rungameid/" + appid, Launchers.Steam));
                 }
             }
+
             return steam_InstalledGames;
         }
 

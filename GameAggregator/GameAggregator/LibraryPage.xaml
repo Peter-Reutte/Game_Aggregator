@@ -8,10 +8,10 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="LibraryPage">
-    <StackPanel>
-        <TextBox x:Name="tbxSearchGame" />
-        <ListView x:Name="listViewGames">
-
-        </ListView>
-    </StackPanel>
+    <Grid Background="{x:Null}">
+        <TextBox Margin="0, 4, 0, 4" x:Name="tbxSearchGame" Text="" VerticalAlignment="Top"/>
+        <ScrollViewer Margin="0, 24, 0, 0" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="spInstalledGames"/>
+        </ScrollViewer>
+    </Grid>
 </Page>

@@ -63,6 +63,9 @@
     <Compile Include="AccountsPage.xaml.cs">
       <DependentUpon>AccountsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\LibraryItem.xaml.cs">
+      <DependentUpon>LibraryItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EpicGames\AuthWindow.xaml.cs">
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
@@ -85,6 +88,10 @@
     <Compile Include="Steam\Models\Steam_GameList.cs" />
     <Compile Include="Uplay\Uplay.cs" />
     <Page Include="AccountsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\LibraryItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

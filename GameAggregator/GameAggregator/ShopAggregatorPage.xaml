@@ -9,6 +9,8 @@
       Title="ShopAggregatorPage">
 
     <Grid>
-        
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="spStoreGamesList"/>
+        </ScrollViewer>
     </Grid>
 </Page>

@@ -9,6 +9,7 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using GameAggregator.EGames.Models;
+using GameAggregator.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -52,7 +53,8 @@ namespace GameAggregator.EGames
         private readonly string egBackendUrl = "https://www.epicgames.com/store/backend/graphql-proxy";
         private readonly string egProductMappingUrl = "https://store-content.ak.epicgames.com/api/content/productmapping";
         private readonly string egProductUrl = "https://store-content.ak.epicgames.com/api/ru/content/products/";
-    
+        private readonly string egGamePageUrl = "https://www.epicgames.com/store/ru/product/";
+
         #endregion
 
         #region WebClients
@@ -60,7 +62,7 @@ namespace GameAggregator.EGames
         private WebClient egBackendClient;
         private WebClient egProductMappingClient;
         private WebClient egGetGameClient;
-  
+
         #endregion
 
         #region Queries
@@ -108,9 +110,9 @@ namespace GameAggregator.EGames
         /// <param name="sortDir">Порядок сортировки</param>
         /// <param name="keyword">Ключевое слово поиска (название)</param>
         /// <returns>Список игр</returns>
-        public List<IEGameStore> GetStoreGames(int startIndex = 0, int count = 30, string keyword = "", EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
+        public List<IStoreGame> GetStoreGames(int startIndex = 0, int count = 30, string keyword = "", EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
         {
-            var games = new List<IEGameStore>();
+            var games = new List<IStoreGame>();
 
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
@@ -170,22 +172,9 @@ namespace GameAggregator.EGames
                     double discountPrice = jPrice["discountPrice"].Value<int>() / Math.Pow(10, dec);
                     string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
                     string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
+                    string link = egGamePageUrl + elem["productSlug"].ToString();
 
-                    var game = new EGame()
-                    {
-                        Name = name,
-                        Id = id,
-                        Namespace = gameNamespace,
-                        UrlName = urlName,
-                        ImageUrlWide = imgWide,
-                        ImageUrlTall = imgTall,
-                        Price = price,
-                        PriceWithDiscount = discountPrice,
-                        PriceStr = priceStr,
-                        PriceWithDiscountStr = discountPriceStr
-                    };
-
-                    games.Add(game);
+                    games.Add(new EpicGames_StoreGame(name, price, link));
                 }
                 catch
                 {

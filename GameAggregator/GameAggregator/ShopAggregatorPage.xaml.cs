@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameAggregator.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GameAggregator.Controls;
 
 namespace GameAggregator
 {
@@ -23,6 +25,22 @@ namespace GameAggregator
         public ShopAggregatorPage()
         {
             InitializeComponent();
+            var games = GetGames("");
+            foreach(var game in games)
+            {
+                spStoreGamesList.Children.Add(new StoreGameControl(game));
+            }
+        }
+
+        public List<IStoreGame> GetGames(string keyword)
+        {
+            List<IStoreGame> games = new List<IStoreGame>();
+
+            EGames.EpicGames eg = new EGames.EpicGames();
+
+            games.AddRange(eg.GetStoreGames(keyword: keyword));
+
+            return games;
         }
     }
 }

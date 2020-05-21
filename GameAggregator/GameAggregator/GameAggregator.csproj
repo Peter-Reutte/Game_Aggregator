@@ -66,6 +66,9 @@
     <Compile Include="Controls\LibraryItem.xaml.cs">
       <DependentUpon>LibraryItem.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\StoreGameControl.xaml.cs">
+      <DependentUpon>StoreGameControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EpicGames\AuthWindow.xaml.cs">
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
@@ -78,6 +81,7 @@
     <Compile Include="LibraryPage.xaml.cs">
       <DependentUpon>LibraryPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\StoreGameModel.cs" />
     <Compile Include="Origin\Origin.cs" />
     <Compile Include="Origin\Models\OriginGame.cs" />
     <Compile Include="ShopAggregatorPage.xaml.cs">
@@ -92,6 +96,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\LibraryItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\StoreGameControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

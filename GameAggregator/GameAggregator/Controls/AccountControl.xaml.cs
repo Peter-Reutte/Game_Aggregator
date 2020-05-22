@@ -51,7 +51,7 @@ namespace GameAggregator.Controls
                 MessageBoxButton.YesNo) == MessageBoxResult.Yes)
             {
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath, "steam.txt"), false);
+                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath + "\\GameAggregator", "steam.txt"), false);
                 sw.Close();
 
                 grView.Visibility = Visibility.Hidden;
@@ -69,7 +69,7 @@ namespace GameAggregator.Controls
                 string username = steam.GetUserInfo(tbLink.Text);
                 lbName.Content = username;
                 string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath, "steam.txt"), false);
+                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath + "\\GameAggregator", "steam.txt"), false);
                 sw.Write(tbLink.Text);
                 sw.Close();
                 grAdd.Visibility = Visibility.Hidden;

@@ -24,7 +24,7 @@ namespace GameAggregator.SteamStore
         {
             SteamWebClient = new WebClient() { Encoding = Encoding.UTF8 };
 
-            string names = ConfigurationManager.AppSettings["names_of_sections"];
+            Key = ConfigurationManager.AppSettings["steam_key"];
         }
 
         /// <summary>

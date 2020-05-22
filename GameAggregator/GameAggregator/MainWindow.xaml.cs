@@ -51,10 +51,11 @@ namespace GameAggregator
         public Accounts GetAccounts()
         {
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            DirectoryInfo di = Directory.CreateDirectory(appDataPath + "\\GameAggregator");
             StreamReader sr;
             try
             {
-                sr = new StreamReader(System.IO.Path.Combine(appDataPath, "steam.txt"));
+                sr = new StreamReader(System.IO.Path.Combine(di.FullName, "steam.txt"));
                 string steamProfileLink = sr.ReadLine();
                 sr.Close();
                 if (Regex.Match(steamProfileLink, "https://steamcommunity.com/").Success)
@@ -69,7 +70,7 @@ namespace GameAggregator
             }
             catch
             {
-                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(appDataPath, "steam.txt"), false);
+                StreamWriter sw = new StreamWriter(System.IO.Path.Combine(di.FullName, "steam.txt"), false);
                 sw.WriteLine();
                 sw.Close();
                 return new Accounts();

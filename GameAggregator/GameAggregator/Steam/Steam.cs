@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -23,10 +24,7 @@ namespace GameAggregator.SteamStore
         {
             SteamWebClient = new WebClient() { Encoding = Encoding.UTF8 };
 
-            //временно -- Steam Web API key
-            StreamReader sr = new StreamReader(@"D:\WebApiKey.txt");
-            Key = sr.ReadLine();
-            sr.Close();
+            string names = ConfigurationManager.AppSettings["names_of_sections"];
         }
 
         /// <summary>

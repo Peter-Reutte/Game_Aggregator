@@ -14,6 +14,8 @@ namespace GameAggregator
     /// </summary>
     public partial class LibraryPage : Page
     {
+        private readonly Accounts Account;
+
         /// <summary>
         /// Страница "Библиотека"
         /// </summary>
@@ -21,6 +23,7 @@ namespace GameAggregator
         public LibraryPage(Accounts accounts)
         {
             InitializeComponent();
+            Account = accounts;
             List<IInstalledGame> games = GetInstalledGames();
             foreach (IInstalledGame game in games)
             {
@@ -89,6 +92,39 @@ namespace GameAggregator
 
             libraryGames.Sort((g1, g2) => g1.Name.CompareTo(g2.Name));
             return libraryGames;
+        }
+
+        private void BtnSearch_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            string search = tbSearchString.Text.ToLower().Trim();
+            spGames.Children.Clear();
+
+            List<IInstalledGame> games = GetInstalledGames();
+            foreach (IInstalledGame game in games)
+            {
+                if (game.Name.ToLower().Contains(search))
+                    spGames.Children.Add(new LibraryItem(game));
+            }
+
+            List<ILibraryGame> library = GetLibraryGames(Account);
+            foreach (ILibraryGame game in library)
+            {
+                if (game.Name.ToLower().Contains(search))
+                {
+                    if (games.Find(x => x.Name == game.Name) == null)
+                    {
+                        spGames.Children.Add(new LibraryItem(game));
+                    }
+                }
+            }
+        }
+
+        private void TbSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                BtnSearch_Click(sender, new System.Windows.RoutedEventArgs());
+            }
         }
     }
 }

@@ -67,6 +67,9 @@
     <Compile Include="Controls\AccountControl.xaml.cs">
       <DependentUpon>AccountControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DotsProgressBarControl.xaml.cs">
+      <DependentUpon>DotsProgressBarControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\LibraryItem.xaml.cs">
       <DependentUpon>LibraryItem.xaml</DependentUpon>
     </Compile>
@@ -101,6 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\AccountControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\DotsProgressBarControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

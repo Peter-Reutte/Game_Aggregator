@@ -27,7 +27,7 @@ namespace GameAggregator
     public partial class ShopAggregatorPage : Page
     {
         private BackgroundWorker bwSearcher;
-        private List<StoreGameControl> games;
+        private List<UserControl> games;
         private IEnumerator<IStoreGame> gamesEnumerator;
 
         public ShopAggregatorPage()
@@ -41,6 +41,8 @@ namespace GameAggregator
             bwSearcher = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             bwSearcher.DoWork += (o, args) =>
             {
+                bwSearcher.ReportProgress(-1);
+
                 for (int i = 0; i < 15; i++)
                 {
                     if (bwSearcher.CancellationPending)
@@ -56,11 +58,24 @@ namespace GameAggregator
 
             bwSearcher.ProgressChanged += (o, args) =>
             {
-                games.Add(new StoreGameControl(args.UserState as IStoreGame));
+                if (args.ProgressPercentage == -1)
+                {
+                    games.Add(new DotsProgressBarControl());
+                }
+                else if (args.UserState != null)
+                {
+                    var progresBar = games.Last();
+                    games.Remove(progresBar);
+                    games.Add(new StoreGameControl(args.UserState as IStoreGame));
+                    games.Add(progresBar);
+                }
                 lvStoreGames.Items.Refresh();
             };
             bwSearcher.RunWorkerCompleted += (o, args) =>
             {
+                games.Remove(games.Last());
+                lvStoreGames.Items.Refresh();
+
                 tbSearchString.IsEnabled = true;
                 btnSearch.IsEnabled = true;
             };
@@ -123,7 +138,7 @@ namespace GameAggregator
             //this.IsEnabled = false;
             bwSearcher.CancelAsync();
 
-            games = new List<StoreGameControl>();
+            games = new List<UserControl>();
             lvStoreGames.ItemsSource = games;
 
             gamesEnumerator = GetGame(tbSearchString.Text).GetEnumerator();

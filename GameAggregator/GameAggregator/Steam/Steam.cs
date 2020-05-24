@@ -175,6 +175,7 @@ namespace GameAggregator.SteamStore
         {
             Uri uri = new UriBuilder(playerProfileLink).Uri;
             string id = uri.Segments[uri.Segments.Length - 1];
+            if (id[id.Length - 1] == '/') id = id.Remove(id.Length - 1);
 
             if (!Regex.IsMatch(id, @"^\d{17}$"))
             {

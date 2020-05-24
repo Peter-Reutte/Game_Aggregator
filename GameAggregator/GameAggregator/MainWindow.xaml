@@ -90,10 +90,9 @@
                 </LinearGradientBrush>
             </Grid.Background>
             <Border BorderThickness="3" BorderBrush="#42AAFF" Margin="10" >
-                <Grid Opacity="0.5" Background="Black">
-                    <Frame x:Name="mainFrame" Margin="10" NavigationUIVisibility="Hidden"/>
-            </Grid>
-        </Border>
+                <Grid Opacity="0.5" Background="Black"/>
+            </Border>
+            <Frame x:Name="mainFrame" Margin="10" NavigationUIVisibility="Hidden"/>
         </Grid>
     </Grid>
 </Window>

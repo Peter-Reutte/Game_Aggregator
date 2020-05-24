@@ -8,10 +8,29 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="HomePage">
     <Grid>
-        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center">
-            Это главная страница.
-            Для получения доступа к доступным играм войдите в аккаунт.
-            *ещё какая-то информация*
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard Name="TextAnimation">
+                        <DoubleAnimation Storyboard.TargetName="tbHello" BeginTime="0:0:0.2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:3"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <TextBlock x:Name="tbHello" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" 
+                   TextAlignment="Center" FontSize="18" Foreground="White" Opacity="0">
+            <Run FontSize = "22" FontWeight="Bold">Привет!</Run>
+            <LineBreak/>
+            <LineBreak/>
+            В данном агрегаторе ты найдешь игры из клиентов Steam, Epic Games, Origin и Uplay.
+            <LineBreak/>
+            Все установленные игры в одном месте! Переходи во вкладку "Библиотека".
+            <LineBreak/>
+            Может ищешь что-то новое? Путь твой лежит во вкладку "Магазин".
+            <LineBreak/>
+            Также ты можешь добавить свой аккаунт во вкладке "Управление аккаунтами".
+            <LineBreak/>
         </TextBlock>
     </Grid>
 </Page>

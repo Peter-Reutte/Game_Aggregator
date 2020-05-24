@@ -17,7 +17,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <TextBox x:Name="tbSearchString" FontSize="14" Margin="5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Text="test"/>
+        <TextBox x:Name="tbSearchString" FontSize="14" Margin="5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
         <Button x:Name="btnSearch" Content="Поиск" Grid.Column="1" Click="BtnSearch_Click"/>
 
         <ListView x:Name="lvStoreGames" FontSize="16" Padding="10" Background="Transparent"

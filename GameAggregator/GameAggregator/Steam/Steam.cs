@@ -63,25 +63,25 @@ namespace GameAggregator.SteamStore
 
             if (steamGames != null)
             {
-                int count = 20;
+                int count = 30;
                 for (int startIndex = 0; startIndex < steamGames.Count; startIndex += count)
                 {
                     var batch = steamGames.GetRange(startIndex, count);
                     string appids = string.Join(",", batch.Select(x => x.Appid));
 
                     List<IStoreGame> storeGames = new List<IStoreGame>();
-                    JObject jsonObj;
+                    string response;
                     try
                     {
-                        string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appids +
+                        response = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appids +
                             "&filters=price_overview");
-                        jsonObj = JObject.Parse(responce);
                     }
                     catch (Exception ex)
                     {
                         throw new Exception("Сервера Steam недоступны");
                     }
 
+                    JObject jsonObj = JObject.Parse(response);
                     foreach (SteamGame game in batch)
                     {
                         if (jsonObj[game.Appid]["success"].ToString() == "False")

@@ -29,6 +29,7 @@ namespace GameAggregator
         private BackgroundWorker bwSearcher;
         private List<UserControl> games;
         private IEnumerator<IStoreGame> gamesEnumerator;
+        private double prevScrollBarHeight = 0;
 
         public ShopAggregatorPage()
         {
@@ -36,6 +37,9 @@ namespace GameAggregator
             InitBackgroundWorker();
         }
 
+        /// <summary>
+        /// Инициализирует BackgroundWorker
+        /// </summary>
         private void InitBackgroundWorker()
         {
             bwSearcher = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
@@ -48,6 +52,7 @@ namespace GameAggregator
                     if (bwSearcher.CancellationPending)
                     {
                         args.Cancel = true;
+                        return;
                     }
                     if (!gamesEnumerator.MoveNext())
                         break;
@@ -81,6 +86,11 @@ namespace GameAggregator
             };
         }
 
+        /// <summary>
+        /// Представляет собой итератор по играм из трех магазинов
+        /// </summary>
+        /// <param name="keyword">Ключевое влово для поиска</param>
+        /// <returns></returns>
         public IEnumerable<IStoreGame> GetGame(string keyword)
         {
             EpicGames epicGames = new EpicGames();
@@ -98,7 +108,7 @@ namespace GameAggregator
                 {
                     fSteam = sEnumerator.MoveNext();
                 }
-                catch
+                catch (Exception ex)
                 {
                     fSteam = false;
                 }
@@ -109,7 +119,7 @@ namespace GameAggregator
                 {
                     fEpicGames = egEnumerator.MoveNext();
                 }
-                catch
+                catch (Exception ex)
                 {
                     fEpicGames = false;
                 }
@@ -135,7 +145,7 @@ namespace GameAggregator
         {
             tbSearchString.IsEnabled = false;
             btnSearch.IsEnabled = false;
-            //this.IsEnabled = false;
+
             bwSearcher.CancelAsync();
 
             games = new List<UserControl>();
@@ -150,10 +160,13 @@ namespace GameAggregator
         private void LvStoreGames_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             var scrollViewer = (ScrollViewer)e.OriginalSource;
-            if (scrollViewer.ScrollableHeight != 0 && scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
+            if (scrollViewer.ScrollableHeight != prevScrollBarHeight && scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
             {
-                if(!bwSearcher.IsBusy)
+                if (!bwSearcher.IsBusy)
+                {
                     bwSearcher.RunWorkerAsync();
+                    prevScrollBarHeight = scrollViewer.ScrollableHeight;
+                }
             }
         }
     }

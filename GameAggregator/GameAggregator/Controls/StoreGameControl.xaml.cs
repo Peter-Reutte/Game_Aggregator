@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,14 +31,25 @@ namespace GameAggregator.Controls
         {
             InitializeComponent();
 
-            Dictionary<Launchers, BitmapSource> bsDict = new Dictionary<Launchers, BitmapSource>()
+            Dictionary<Launchers, BitmapSource> bsDict;
+            MemoryCache memCache = MemoryCache.Default;
+            string memKey = "launchers_icons_dict";
+            if (!memCache.Contains(memKey))
             {
-                { Launchers.EpicGames, GetBitmapISource(Launchers.EpicGames) },
-                { Launchers.Origin, GetBitmapISource(Launchers.Origin) },
-                { Launchers.Steam, GetBitmapISource(Launchers.Steam) },
-                { Launchers.Uplay, GetBitmapISource(Launchers.Uplay) },
-                { Launchers.Other, GetBitmapISource(Launchers.Other) }
-            };
+                bsDict = new Dictionary<Launchers, BitmapSource>()
+                {
+                    { Launchers.EpicGames, GetBitmapSource(Launchers.EpicGames) },
+                    { Launchers.Origin, GetBitmapSource(Launchers.Origin) },
+                    { Launchers.Steam, GetBitmapSource(Launchers.Steam) },
+                    { Launchers.Uplay, GetBitmapSource(Launchers.Uplay) },
+                    { Launchers.Other, GetBitmapSource(Launchers.Other) }
+                };
+                memCache.Set(memKey, bsDict, DateTimeOffset.Now.AddDays(7.0));
+            }
+            else
+            {
+                bsDict = memCache.Get(memKey) as Dictionary<Launchers, BitmapSource>;
+            }
 
             tbGameName.Text = game.Name;
             tbGamePrice.Text = game.Price.ToString() + " ₽";
@@ -45,7 +57,12 @@ namespace GameAggregator.Controls
             btnGoTOStore.Click += (o, args) => Process.Start(game.Link);
         }
 
-        private BitmapSource GetBitmapISource(Launchers launcher)
+        /// <summary>
+        /// Получает BitmapSource из иконки лаунчера, лежащей в ресурсах
+        /// </summary>
+        /// <param name="launcher">Лаунчер для которого необходимо получить иконку</param>
+        /// <returns></returns>
+        private BitmapSource GetBitmapSource(Launchers launcher)
         {
             Bitmap img;
             switch (launcher)
@@ -58,17 +75,6 @@ namespace GameAggregator.Controls
             }
 
             return Imaging.CreateBitmapSourceFromHBitmap(img.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            //BitmapImage bitmapImage = new BitmapImage();
-            //using (MemoryStream memory = new MemoryStream())
-            //{
-            //    bitmap.Save(memory, ImageFormat.Png);
-            //    memory.Position = 0;
-            //    bitmapImage.BeginInit();
-            //    bitmapImage.StreamSource = memory;
-            //    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            //    bitmapImage.EndInit();
-            //}
-            //return bitmapImage;
         }
     }
 }

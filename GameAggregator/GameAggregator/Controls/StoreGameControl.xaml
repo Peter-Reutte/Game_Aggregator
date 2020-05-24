@@ -21,8 +21,6 @@
         <TextBlock x:Name="tbGameName" Grid.Row="0" Grid.Column="1" TextWrapping="Wrap" Foreground="White" FontSize="16"/>
         <TextBlock x:Name="tbGamePrice" Grid.Row="1" Grid.Column="1" Foreground="White" Margin="10, 0"/>
         <Button x:Name="btnGoTOStore" Content="Перейти к магазину" 
-                Grid.RowSpan="2" Grid.Column="2" 
-                Padding="15, 10" Margin="10, 0"
-                VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                Grid.RowSpan="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
     </Grid>
 </UserControl>

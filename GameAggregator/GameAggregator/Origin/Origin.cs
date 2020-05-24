@@ -22,7 +22,7 @@ namespace GameAggregator.OriginStore
         /// </summary>
         /// <param name="name">Название для поиска</param>
         /// <returns>Список найденных вариантов (включая базовые игры, DLC и проч.)</returns>
-        public List<IStoreGame> GetGamePrice(string name)
+        public IEnumerable<IStoreGame> GetGamePrice(string name)
         {
             JObject jData;
             string responce;
@@ -47,35 +47,49 @@ namespace GameAggregator.OriginStore
                 throw new Exception("Сервера Origin недоступны");
             }
 
-            JObject jsonObj = JObject.Parse(responce);
-            List<IStoreGame> games = new List<IStoreGame>();
-            if (jsonObj["games"]["game"] != null)
+            int startIndex = 0;
+            JObject jsonObj;
+            do
             {
-                foreach (JToken token in jsonObj["games"]["game"].Children())
+                try
                 {
-                    //Поиск в json-базе объектов с OfferPath, указанных в поле children
-                    string[] gamePaths = token["children"].ToString().Split(',');
-                    var withSamePaths = (jData["offers"] as JArray).Where(x => gamePaths.Contains(x["offerPath"].ToString()));
-                    //Выбор тех вариантов, для которых указана цена
-                    var withPrice = withSamePaths.Where(x => x["countries"]["catalogPrice"].ToString() != "");
-                    if (withPrice.Count() > 1)
-                    {
-                        //Если несколько версий, берем standard-edition, если она есть
-                        var standardEdition = withPrice.Where(x => x["offerPath"].ToString().Contains("standard-edition"));
-                        if (standardEdition.Count() != 0)
-                            withPrice = standardEdition;
-                    }
-                    //Выводим только минимальную цену, если нет standard edition?
-                    //Такое в основном у валюты и игр с кастомными названиями изданий
-                    //Если не удалось извлечь цену, на всякий случай указывается -1, хотя у всех текущих позиций цена есть
-                    double price = withPrice.Count() == 0 ? -1 : withPrice.Select(x => x["countries"]["catalogPrice"].Value<double>()).Min();
-
-                    games.Add(new Origin_StoreGame(token["gameName"].ToString(), price, 
-                        "https://www.origin.com/rus/en-us/store" + token["path"].ToString()));
+                    responce = OriginWebClient.DownloadString("https://api4.origin.com/xsearch/store/en_us/rus/products?searchTerm="
+                        + name + $"&sort=rank desc,releaseDate desc,title desc&start={startIndex}&rows=20&isGDP=true");
                 }
-            }
+                catch
+                {
+                    throw new Exception("Сервера Origin недоступны");
+                }
 
-            return games;
+                jsonObj = JObject.Parse(responce);
+                if (jsonObj["games"]["game"] != null)
+                {
+                    foreach (JToken token in jsonObj["games"]["game"].Children())
+                    {
+                        //Поиск в json-базе объектов с OfferPath, указанных в поле children
+                        string[] gamePaths = token["children"].ToString().Split(',');
+                        var withSamePaths = (jData["offers"] as JArray).Where(x => gamePaths.Contains(x["offerPath"].ToString()));
+                        //Выбор тех вариантов, для которых указана цена
+                        var withPrice = withSamePaths.Where(x => x["countries"]["catalogPrice"].ToString() != "");
+                        if (withPrice.Count() > 1)
+                        {
+                            //Если несколько версий, берем standard-edition, если она есть
+                            var standardEdition = withPrice.Where(x => x["offerPath"].ToString().Contains("standard-edition"));
+                            if (standardEdition.Count() != 0)
+                                withPrice = standardEdition;
+                        }
+                        //Выводим только минимальную цену, если нет standard edition?
+                        //Такое в основном у валюты и игр с кастомными названиями изданий
+                        //Если не удалось извлечь цену, на всякий случай указывается -1, хотя у всех текущих позиций цена есть
+                        double price = withPrice.Count() == 0 ? -1 : withPrice.Select(x => x["countries"]["catalogPrice"].Value<double>()).Min();
+
+                        yield return new Origin_StoreGame(token["gameName"].ToString(), price,
+                            "https://www.origin.com/rus/en-us/store" + token["path"].ToString());
+                    }
+                }
+                startIndex++;
+            }
+            while (jsonObj["games"]["game"].Children().Count() > 0);
         }
 
         #region Installed games

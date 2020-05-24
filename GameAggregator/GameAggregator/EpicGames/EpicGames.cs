@@ -110,16 +110,13 @@ namespace GameAggregator.EGames
         /// <param name="sortDir">Порядок сортировки</param>
         /// <param name="keyword">Ключевое слово поиска (название)</param>
         /// <returns>Список игр</returns>
-        public List<IStoreGame> GetStoreGames(int startIndex = 0, int count = 30, string keyword = "", EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
+        public IEnumerable<IStoreGame> GetStoreGames(string keyword = "", EGSortBy sortBy = EGSortBy.Date, EGSortDir sortDir = EGSortDir.Desc)
         {
-            var games = new List<IStoreGame>();
-
             string sortByStr = (sortBy == EGSortBy.Title ? "title" : (sortBy == EGSortBy.Date ? "releaseDate" : null));
             string sortDirStr = sortDir.ToString().ToUpper();
-            string variablesQuery = string.Format(storeQueryVariables, count, keyword, sortByStr, sortDirStr, startIndex);
-            string query = string.Format(storeQuery, variablesQuery);
             string response;
             IEnumerable<JProperty> jMap;
+            JToken elements = null;
 
             try
             {
@@ -131,61 +128,56 @@ namespace GameAggregator.EGames
                     memCache.Set(productMappingCacheKey, jMapProd, DateTimeOffset.Now.AddDays(7.0));
                 }
                 jMap = (memCache.Get(productMappingCacheKey) as JObject).Properties();
-
-                response = egBackendClient.UploadString("", query);
             }
             catch
             {
                 throw new Exception("Сервер Epic Games недоступен");
             }
 
-            var jObj = JObject.Parse(response);
-            var elements = jObj["data"]["Catalog"]["searchStore"]["elements"];
-
-            if (elements.Count() == 0)
-                return null;
-
-            foreach (var elem in elements.Children())
+            int startIndex = 0;
+            int count = 1000;
+            try
             {
-                try
-                {
-                    if (elem["effectiveDate"].Value<DateTime>().Year == 2099)
-                        continue; //Игры еще нет в продаже
-
-                    var name = elem["title"].ToString();
-                    var id = elem["id"].ToString();
-
-                    var gameNamespace = elem["namespace"].ToString();
-                    var urlName = jMap.First(x => x.Name == gameNamespace).Value.ToString();
-
-                    var imgWide = elem["keyImages"]
-                        .First(x => x["type"].ToString() == "OfferImageWide")
-                        ["url"].ToString();
-
-                    var imgTall = elem["keyImages"]
-                            .FirstOrDefault(x => x["type"].ToString() == "OfferImageTall")?
-                            ["url"].ToString();
-                    imgTall = imgTall ?? elem["keyImages"]
-                            .FirstOrDefault(x => x["type"].ToString() == "DieselGameBoxLogo")?
-                            ["url"].ToString();
-
-                    var jPrice = elem["price"]["totalPrice"];
-                    int dec = jPrice["currencyInfo"]["decimals"].Value<int>();
-                    double price = jPrice["originalPrice"].Value<int>() / Math.Pow(10, dec);
-                    double discountPrice = jPrice["discountPrice"].Value<int>() / Math.Pow(10, dec);
-                    string priceStr = jPrice["fmtPrice"]["originalPrice"].ToString();
-                    string discountPriceStr = jPrice["fmtPrice"]["discountPrice"].ToString();
-                    string link = egGamePageUrl + elem["productSlug"].ToString();
-
-                    games.Add(new EpicGames_StoreGame(name, price, link));
-                }
-                catch
-                {
-                    continue;
-                }
+                string variablesQuery = string.Format(storeQueryVariables, count, keyword, sortByStr, sortDirStr, startIndex);
+                string query = string.Format(storeQuery, variablesQuery);
+                response = egBackendClient.UploadString("", query);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Сервер Epic Games недоступен");
             }
 
-            return games;
+            var jObj = JObject.Parse(response);
+            elements = jObj["data"]["Catalog"]["searchStore"]["elements"];
+
+            if (elements.Count() != 0)
+            {
+                foreach (var elem in elements.Children())
+                {
+                    EpicGames_StoreGame game = null;
+                    try
+                    {
+                        if (elem["effectiveDate"].Value<DateTime>().Year == 2099)
+                            continue; //Игры еще нет в продаже
+
+                        var name = elem["title"].ToString();
+
+                        var jPrice = elem["price"]["totalPrice"];
+                        int dec = jPrice["currencyInfo"]["decimals"].Value<int>();
+                        double price = jPrice["originalPrice"].Value<int>() / Math.Pow(10, dec);
+                        string link = egGamePageUrl + elem["productSlug"].ToString();
+
+                        game = new EpicGames_StoreGame(name, price, link);
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    if (game != null)
+                        yield return game;
+                }
+            }
         }
 
         /// <summary>

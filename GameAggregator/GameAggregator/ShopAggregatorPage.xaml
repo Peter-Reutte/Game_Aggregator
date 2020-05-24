@@ -21,7 +21,7 @@
         <Button x:Name="btnSearch" Content="Поиск" Grid.Column="1" Click="BtnSearch_Click"/>
 
         <ListView x:Name="lvStoreGames" FontSize="16" Padding="10" Background="Transparent"
-                  Grid.Row="1" Grid.ColumnSpan="2">
+                  Grid.Row="1" Grid.ColumnSpan="2" ScrollViewer.ScrollChanged="LvStoreGames_ScrollChanged">
             <ListView.Resources>
                 <Style TargetType="ListViewItem">
                     <Setter Property="Background" Value="Transparent" />

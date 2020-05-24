@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.Caching;
 using System.Text;
@@ -52,50 +53,56 @@ namespace GameAggregator.SteamStore
         /// </summary>
         /// <param name="name">Название игры</param>
         /// <returns>Результат поиска; null, если не найдено</returns>
-        public List<IStoreGame> GetGamePrice(string name)
+        public IEnumerable<IStoreGame> GetGamePrice(string name)
         {
             MemoryCache memCache = MemoryCache.Default;
             if (!memCache.Contains("steamapps")) RefreshAppIDs();
             List<SteamGame> apps = memCache.Get("steamapps") as List<SteamGame>;
 
             List<SteamGame> steamGames = apps.FindAll(x => x.Name.ToLower().Contains(name.ToLower()));
-            if (steamGames == null) return null;
 
-            string appids = steamGames[0].Appid;
-            for (int i = 1; i < steamGames.Count; i++)
-                appids += "," + steamGames[i].Appid;
-
-            List<IStoreGame> storeGames = new List<IStoreGame>();
-            try
+            if (steamGames != null)
             {
-                string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appids +
-                    "&filters=price_overview");
-                JObject jsonObj = JObject.Parse(responce);
-
-                foreach (SteamGame game in steamGames)
+                int count = 20;
+                for (int startIndex = 0; startIndex < steamGames.Count; startIndex += count)
                 {
-                    if (jsonObj[game.Appid]["success"].ToString() == "False")
-                        continue;
+                    var batch = steamGames.GetRange(startIndex, count);
+                    string appids = string.Join(",", batch.Select(x => x.Appid));
 
-                    Steam_StoreGame steam_StoreGame;
+                    List<IStoreGame> storeGames = new List<IStoreGame>();
+                    JObject jsonObj;
                     try
                     {
-                        steam_StoreGame = new Steam_StoreGame(game.Name,
-                            double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
-                            "https://store.steampowered.com/app/" + game.Appid);
+                        string responce = SteamWebClient.DownloadString("https://store.steampowered.com/api/appdetails?appids=" + appids +
+                            "&filters=price_overview");
+                        jsonObj = JObject.Parse(responce);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        continue;
+                        throw new Exception("Сервера Steam недоступны");
                     }
 
-                    storeGames.Add(steam_StoreGame);
+                    foreach (SteamGame game in batch)
+                    {
+                        if (jsonObj[game.Appid]["success"].ToString() == "False")
+                            continue;
+
+                        Steam_StoreGame steam_StoreGame = null;
+                        try
+                        {
+                            steam_StoreGame = new Steam_StoreGame(game.Name,
+                                double.Parse(jsonObj[game.Appid]["data"]["price_overview"]["final"].ToString()) / 100,
+                                "https://store.steampowered.com/app/" + game.Appid);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        if (steam_StoreGame != null)
+                            yield return steam_StoreGame;
+                    }
                 }
-                return storeGames;
-            }
-            catch
-            {
-                throw new Exception("Сервера Steam недоступны");
             }
         }
 

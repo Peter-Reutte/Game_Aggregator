@@ -27,55 +27,119 @@ namespace GameAggregator
     public partial class ShopAggregatorPage : Page
     {
         private BackgroundWorker bwSearcher;
+        private List<StoreGameControl> games;
+        private IEnumerator<IStoreGame> gamesEnumerator;
+
         public ShopAggregatorPage()
         {
             InitializeComponent();
+            InitBackgroundWorker();
+        }
 
-            bwSearcher = new BackgroundWorker();
+        private void InitBackgroundWorker()
+        {
+            bwSearcher = new BackgroundWorker() { WorkerReportsProgress = true, WorkerSupportsCancellation = true };
             bwSearcher.DoWork += (o, args) =>
             {
-                string keyword = args.Argument as string;
-                var games = GetGames(keyword);
-                args.Result = games;
+                for (int i = 0; i < 15; i++)
+                {
+                    if (bwSearcher.CancellationPending)
+                    {
+                        args.Cancel = true;
+                    }
+                    if (!gamesEnumerator.MoveNext())
+                        break;
+
+                    bwSearcher.ReportProgress(i, gamesEnumerator.Current);
+                }
+            };
+
+            bwSearcher.ProgressChanged += (o, args) =>
+            {
+                games.Add(new StoreGameControl(args.UserState as IStoreGame));
+                lvStoreGames.Items.Refresh();
             };
             bwSearcher.RunWorkerCompleted += (o, args) =>
             {
-                List<IStoreGame> games = args.Result as List<IStoreGame>;
-                lvStoreGames.ItemsSource = games.Select(x => new StoreGameControl(x));
-                this.IsEnabled = true;
+                tbSearchString.IsEnabled = true;
+                btnSearch.IsEnabled = true;
             };
         }
 
-        public List<IStoreGame> GetGames(string keyword)
+        public IEnumerable<IStoreGame> GetGame(string keyword)
         {
-            List<IStoreGame> games = new List<IStoreGame>();
-
             EpicGames epicGames = new EpicGames();
             Steam steam = new Steam();
             Origin origin = new Origin();
 
-            try
+            IEnumerator<IStoreGame> sEnumerator = steam.GetGamePrice(keyword).GetEnumerator();
+            IEnumerator<IStoreGame> egEnumerator = epicGames.GetStoreGames(keyword: keyword).GetEnumerator();
+            IEnumerator<IStoreGame> oEnumerator = origin.GetGamePrice(keyword).GetEnumerator();
+
+            bool fEpicGames = true, fOrigin = true, fSteam = true;
+            while (fEpicGames || fOrigin || fSteam)
             {
-                games.AddRange(epicGames.GetStoreGames(keyword: keyword));
+                try
+                {
+                    fSteam = sEnumerator.MoveNext();
+                }
+                catch
+                {
+                    fSteam = false;
+                }
+                if (fSteam)
+                    yield return sEnumerator.Current;
+
+                try
+                {
+                    fEpicGames = egEnumerator.MoveNext();
+                }
+                catch
+                {
+                    fEpicGames = false;
+                }
+
+                if (fEpicGames)
+                    yield return egEnumerator.Current;
+
+                try
+                {
+                    fOrigin = oEnumerator.MoveNext();
+                }
+                catch
+                {
+                    fOrigin = false;
+                }
+
+                if (fOrigin)
+                    yield return oEnumerator.Current;
             }
-            catch { }
-            try
-            {
-                games.AddRange(origin.GetGamePrice(keyword));
-            }
-            catch { }
-            try
-            {
-                games.AddRange(steam.GetGamePrice(keyword));
-            }
-            catch { }
-            return games;
         }
 
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
-            this.IsEnabled = false;
-            bwSearcher.RunWorkerAsync(tbSearchString.Text);
+            tbSearchString.IsEnabled = false;
+            btnSearch.IsEnabled = false;
+            //this.IsEnabled = false;
+            bwSearcher.CancelAsync();
+
+            games = new List<StoreGameControl>();
+            lvStoreGames.ItemsSource = games;
+
+            gamesEnumerator = GetGame(tbSearchString.Text).GetEnumerator();
+
+            InitBackgroundWorker();
+            bwSearcher.RunWorkerAsync();
+        }
+
+        private void LvStoreGames_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            var scrollViewer = (ScrollViewer)e.OriginalSource;
+            if (scrollViewer.ScrollableHeight != 0 && scrollViewer.VerticalOffset == scrollViewer.ScrollableHeight)
+            {
+                if(!bwSearcher.IsBusy)
+                    bwSearcher.RunWorkerAsync();
+            }
         }
     }
 }

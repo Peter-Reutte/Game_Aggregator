@@ -9,12 +9,22 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="LibraryPage">
     <Grid Background="{x:Null}">
-        <TextBox x:Name="tbSearchString"  FontSize="14" Margin="4, 4, 120, 0" 
-                 VerticalAlignment="Top" KeyDown="TbSearch_KeyDown"/>
-        <Button x:Name="btnSearch" Content="Поиск" Margin="4, 4, 4, 4" FontSize="14" Width="100" 
-                HorizontalAlignment="Right" VerticalAlignment="Top" Click="BtnSearch_Click"/>
-        <ScrollViewer Margin="0, 32, 0, 0" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="spGames"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="tbSearchString" FontSize="14" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Margin="5" KeyDown="TbSearch_KeyDown"/>
+            <Button x:Name="btnSearch" Grid.Column="1" Content="Поиск" Click="BtnSearch_Click"/>
+        </Grid>
+        
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="spGames" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.CanContentScroll="True" CanVerticallyScroll="True"/>
         </ScrollViewer>
     </Grid>
 </Page>

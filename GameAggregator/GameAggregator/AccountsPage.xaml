@@ -7,16 +7,53 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="AccountsPage">
+    <Page.Resources>
+        <Style TargetType="Button" x:Key="btnButtonAccounts">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Width" Value="130"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5, 5, 0, 5" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="Bahnschrift Condenced"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="0, 6, 0, 6" Background="{TemplateBinding Background}" BorderBrush="SteelBlue" BorderThickness="2">
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Triggers>
+                <Trigger Property="Control.IsMouseOver" Value="True">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="0, 6, 0, 6" Background="{TemplateBinding Background}" BorderBrush="#FFCF48" BorderThickness="2">
+                                    <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    
     <Grid>
         <!--Кнопки для добавления аккаунтов, невидимы, если аккаунт этой платформы уже есть-->
         <!--На данный момент будет только Steam-->
-        <Button x:Name="btnSteamAccount" Margin="4, 4, 4, 4" Content="+ Steam" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Button x:Name="btnSteamAccount" Content="+ Steam" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource btnButtonAccounts}"
                 Visibility="Visible" Click="BtnSteamAccount_Click"/>
-        <Button x:Name="btnEpicAccount" Margin="88, 4, 4, 4" Content="+ EGS" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Button x:Name="btnEpicAccount" Margin="88, 4, 4, 4" Content="+ EGS" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource btnButtonAccounts}"
                 Visibility="Hidden"/>
-        <Button x:Name="btnUplayAccount" Margin="172, 4, 4, 4" Content="+ Uplay" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Button x:Name="btnUplayAccount" Margin="172, 4, 4, 4" Content="+ Uplay" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource btnButtonAccounts}"
                 Visibility="Hidden"/>
-        <Button x:Name="btnOriginAccount" Margin="256, 4, 4, 4" Content="+ Origin" Width="80" HorizontalAlignment="Left" VerticalAlignment="Top"
+        <Button x:Name="btnOriginAccount" Margin="256, 4, 4, 4" Content="+ Origin" HorizontalAlignment="Left" VerticalAlignment="Top" Style="{StaticResource btnButtonAccounts}"
                 Visibility="Hidden"/>
         
         <ScrollViewer Margin="0, 28, 0, 0" VerticalScrollBarVisibility="Auto">

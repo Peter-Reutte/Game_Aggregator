@@ -7,7 +7,6 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="ShopAggregatorPage">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,9 +17,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <TextBox x:Name="tbSearchString"  FontSize="14" Margin="0, 5, 5, 5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center"/>
-        <Button x:Name="btnSearch" Content="Поиск" Grid.Column="1" Padding="50, 5" Margin="5, 5, 0, 5" FontSize="14" 
-                HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Click="BtnSearch_Click"/>
+        <TextBox x:Name="tbSearchString" FontSize="14" Margin="5" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Text="test"/>
+        <Button x:Name="btnSearch" Content="Поиск" Grid.Column="1" Click="BtnSearch_Click"/>
 
         <ListView x:Name="lvStoreGames" FontSize="16" Padding="10" Background="Transparent"
                   Grid.Row="1" Grid.ColumnSpan="2">
@@ -34,6 +32,18 @@
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
+                </Style>
+                <Style TargetType="Button">
+                    <Setter Property="Width" Value="200"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Margin" Value="5, 5, 0, 5" />
+                    <Setter Property="Foreground" Value="SteelBlue" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="FontFamily" Value="Bahnschrift Condenced"/>
+                    <Setter Property="Height" Value="40"/>
+                    <Setter Property="BorderThickness" Value="0"/>
                 </Style>
             </ListView.Resources>
         </ListView>

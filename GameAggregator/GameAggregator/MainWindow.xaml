@@ -5,8 +5,94 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GameAggregator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
-    <Grid>
-        
+        Title="Game Aggregator" Height="450" Width="800" MinHeight="450" MinWidth="800" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+    <Window.Resources>
+        <!--Стили кнопок-->
+        <Style TargetType="Button">
+            <Setter Property="Control.FontFamily" Value="Bahnschrift Condenced"/>
+            <Setter Property="Control.VerticalAlignment" Value="Center"/>
+            <Setter Property="Control.HorizontalAlignment" Value="Center"/>
+            <Setter Property="Control.FontSize" Value="17"/>
+            <Setter Property="Control.Margin" Value="10"/>
+            <Setter Property="Control.Height" Value="45"/>
+            <Setter Property="Control.Width" Value="255"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Control.Foreground" Value="White"/>
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="6,0,6,0" Background="{TemplateBinding Background}" BorderBrush="SteelBlue" BorderThickness="0,5,5,0">
+                            <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Control.IsMouseOver" Value="True">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="6,0,6,0" Background="{TemplateBinding Background}" BorderBrush="#FFCF48" BorderThickness="0,5,5,0">
+                                    <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="Button.IsFocused" Value="True">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border CornerRadius="6,0,6,0" Background="{TemplateBinding Background}" BorderBrush="#FF1493" BorderThickness="0,5,5,0">
+                                    <ContentPresenter x:Name="contentPresenter" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#BFE8EC" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Background="#242424">
+            <!--<Grid.Background>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="#282828" Offset="0"/>
+                    <GradientStop Color="#505050" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>-->
+
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="70"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Margin="0, 15">
+                <Button x:Name="btnLibrary" Content="Библиотека" Click="BtnLibrary_Click"/>
+                <Button x:Name="btnShop" Content="Магазин" Click="BtnShop_Click"/>
+            </StackPanel>
+
+            <Button x:Name="btnManageAccounts" Grid.Row="1" Content="Управление аккаунтами" Margin="10, 0, 10, 10" Click="BtnManageAccounts_Click"/>
+        </Grid>
+
+        <Grid Grid.Column="1" >
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="1,0" StartPoint="1,1">
+                    <GradientStop Color="#1E1E1E" Offset="0"/>
+                    <GradientStop Color="#AAA" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Border BorderThickness="3" BorderBrush="#42AAFF" Margin="10" >
+                <Grid Opacity="0.5" Background="Black"/>
+            </Border>
+            <Frame x:Name="mainFrame" Margin="10" NavigationUIVisibility="Hidden"/>
+        </Grid>
     </Grid>
 </Window>

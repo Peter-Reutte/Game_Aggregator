@@ -1,0 +1,36 @@
+﻿<Page x:Class="GameAggregator.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:GameAggregator"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="HomePage">
+    <Grid>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="Loaded">
+                <BeginStoryboard>
+                    <Storyboard Name="TextAnimation">
+                        <DoubleAnimation Storyboard.TargetName="tbHello" BeginTime="0:0:0.2" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:3"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
+        <TextBlock x:Name="tbHello" 
+                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" 
+                   TextAlignment="Center" FontSize="18" Foreground="White" Opacity="0">
+            <Run FontSize = "22" FontWeight="Bold">Привет!</Run>
+            <LineBreak/>
+            <LineBreak/>
+            В данном агрегаторе ты найдешь игры из клиентов Steam, Epic Games, Origin и Uplay.
+            <LineBreak/>
+            Все установленные игры в одном месте! Переходи во вкладку "Библиотека".
+            <LineBreak/>
+            Может ищешь что-то новое? Путь твой лежит во вкладку "Магазин".
+            <LineBreak/>
+            Также ты можешь добавить свой аккаунт во вкладке "Управление аккаунтами".
+            <LineBreak/>
+        </TextBlock>
+    </Grid>
+</Page>
